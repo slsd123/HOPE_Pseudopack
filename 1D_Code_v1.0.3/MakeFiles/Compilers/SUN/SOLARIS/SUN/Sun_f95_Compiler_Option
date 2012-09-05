@@ -1,0 +1,201 @@
+________________________________________________________________________________
+Items within [ ] are optional. Items within < > are variable parameters.
+Bar | indicates choice of literal values. For example:
+   -someoption[=<yes|no>] implies  -someoption  is  -someoption=yes
+________________________________________________________________________________
+-a:                   Collect data for tcov basic block profiling (old format)
+-aligncommon[=<a>]:   Align common block elements to the specified boundary requirement, <a>={1|2|4|8|16}.
+-ansi:                Report non-ANSI extensions.
+-autopar:             Enable automatic loop parallelization (requires WorkShop license)
+-Bdynamic:            Allow dynamic linking
+-Bstatic:             Require static linking
+-C:                   Enable runtime subscript range checking
+-c:                   Compile only; produce .o files, suppress linking
+-cg89:                Generate code for generic SPARC V7 architecture
+-cg92:                Generate code for SPARC V8 architecture
+-copyargs:            Allow assignment to constant arguments
+-D<name>[=<token>]:   Define preprocessor symbol <name> with <token>
+-dalign:              Force 8-byte data alignment and enable double-word load/stores
+-db:                  Generate a compiler information (CIF) file
+-dbl_align_all[=<a>]: Force 8-byte alignment of all data, <a>=yes|no
+-depend:              Analyze loops for data dependencies
+-dn:                  Allow only static linking of libraries
+-dryrun:              Show compiler commands built by driver, no compilation
+-dy:                  Allow dynamic linking of libraries
+-e:                   Accept extended (132 character) input source lines
+-erroff=<list>:       Suppress warnings specified by list of tags <list>
+-errtags[=<a>]:       Display messages with tags, <a>=yes|no
+-explicitpar:         Parallelize loops explicitly marked with directives (requires WorkShop license)
+-ext_names=plain:     Use the Sun C compiler's naming conventions (no underscores)
+-ext_names=underscores: Use the Sun FORTRAN 90 compiler's naming conventions (add underscores)
+-F:                   Apply the preprocessor to .F and .F90 files, but do not compile
+-f:                   Force non-standard data alignment on 8-byte boundaries
+-fast:                Optimize using a selection of options
+-fixed:               Accept fixed-format input source files
+-flags:               Show this summary of compiler options
+-fnonstd:             Initialize floating-point hardware to non-standard preferences
+-fns[=<a>]:           Select non-standard floating-point mode, <a>=yes|no
+-fpover[=<a>]:        Provide run-time overflow check during READ, <a>=yes|no
+-fpp:                 Expands source code macros and enables conditional compilation of code
+-free:                Accept free-format input source files
+-fround=<r>:          Select the IEEE rounding mode in effect at startup
+-fsimple[=<n>]:       Select floating-point optimization level, <n>=1|0|2
+-ftrap=<t>:           Select floating-point trapping mode in effect at startup
+-G:                   Build a dynamic shared library
+-g:                   Compile for debugging
+-h<name>:             Assign <name> to generated dynamic shared library
+-help:                Show this summary of compiler options
+-I<dir>:              Add directory <dir> to INCLUDE and #include search path
+-inline=[a,...,a]:    Attempt inlining of specified user routines, <a>={%auto,func,no%func}
+-KPIC:                Compile position independent code with 32-bit addresses
+-Kpic:                Compile position independent code
+-L<dir>:              Add directory <dir> to library search path
+-l<name>:             Link with library lib<name>.a or lib<name>.so
+-libmil:              Inline selected libm math routines for optimization
+-loopinfo:            Show loops that parallelized (requires WorkShop license)
+-M<dir>:              Add directory <dir> to module search path
+-mp=<p>:              Accept the sun/cray-style MP directives, <p>={%none|sun|cray|openmp}
+-mt:                  Specify options needed when compiling multithreaded code
+-native:              Optimize for the host system (-xtarget=native)
+-noautopar:           Cancel -autopar on command line
+-nodepend:            Cancel -depend on command line
+-noexplicitpar:       Cancel -explicitpar on command line
+-nolib:               Do not link with default system libraries
+-nolibmil:            Cancel -libmil on command line
+-noqueue:             Disable queuing of compiler license requests 
+-noreduction:         Cancel -reduction on command line
+-norunpath:           Do not build a runtime search path into the executable
+-O:                   Use default optimization level (-xO3)
+-O1:                  Provide minimum statement-level optimizations
+-O2:                  Enable basic block-level optimizations
+-O3:                  Add loop unrolling and global optimizations
+-O4:                  Add automatic inlining of routines from same source file
+-O5:                  Attempt aggressive optimizations (with profile feedback)
+-o <file>:            Set name of output or executable to <file>
+-onetrip:             Enable one-trip DO loops
+-openmp:              Accept the openMP directives 
+-PIC:                 Same as -KPIC
+-p:                   Compile for profiling with prof
+-pad[=<p>]:           Pad variables for efficient use of cache, <p>=local|common
+-parallel:            Parallelize loops with -autopar, -explicitpar, -depend
+-pg:                  Compile for profiling with gprof
+-pic:                 Same as -Kpic
+-Qoption <p> <list>:  Pass options <list> to compilation phase <p>
+-qp:                  Same as -p
+-R<d1>[:..:<dn>]:     Build runtime search path list into executable
+-r8const:             Promote single precision const to double precision.
+-reduction:           Recognize reduction operations in parallelized loops
+-S:                   Compile and only generate assembly code (.s)
+-s:                   Strip symbol table from the executable file
+-sb:                  Compile for use with the WorkShop source browser
+-sbfast:              Generate only WorkShop source browser information, no compilation
+-silent:              Do not echo file and routine names during compilation
+-stackvar:            Allocate all local variables on the memory stack
+-stop_status[=<a>]:   STOP statement returns integer status to shell, <a>=yes|no
+-temp=<dir>:          Use <dir> as directory for temporary files
+-time:                Report the execution time for each compilation phase
+-U:                   Recognize upper case and lower case in source files
+-u:                   Report on use of undeclared variables
+-unroll=<n>:          Enable unrolling loops to a depth <n> > 0 where possible
+-V:                   Report version number of each compilation phase
+-v:                   Verbose mode
+-vpara:               Verbose parallelization warnings (requires WorkShop license)
+-w:                   Suppress compiler warning messages
+-w0:                  Show error messages
+-w1:                  Show errors and warnings (default)
+-w2:                  Show errors, warnings, and cautions
+-w3:                  Show errors, warnings, cautions, and notes
+-w4:                  Show errors, warnings, cautions, notes, and comments
+-Xlist:               Show global errors, cross reference, and listing
+-XlistE:              Show only global errors
+-XlisterrNNN:         Suppress error NNN messages
+-Xlistf:              For faster output, -Xlist but no compilation
+-XlistI:              Analyze #include and INCLUDE files as well as source
+-XlistL:              Show only listing and global errors
+-XlistlN:             Set page length for listings to N lines. Default is 66
+-Xlisto name:         Redirect output listings to the file name.lst
+-XlistwarNNN:         Suppress warning NNN messages
+-XlistX:              Show only cross reference and errors
+-xa:                  Same as -a
+-xarch=<a>:           Specify target architecture instruction set
+-xautopar:            Same as -autopar
+-xcache=<c>:          Define cache properties for the optimizer
+-xcg89:               Same as -cg89
+-xcg92:               Same as -cg92
+-xchip=<c>:           Specify target processor for the optimizer
+-xcode=<c>:           Generate different code for forming addresses 
+-xcommonchk[=<a>]:    Enable run-time taskcommon consistency check, <a>=yes|no
+-xcrossfile[=<n>]:    Enable optimization across source files, <n>=1|0
+-xdepend:             Same as -depend
+-xexplicitpar:        Same as -explicitpar
+-xF:                  Compile for later mapfile reordering
+-xhelp=flags:         Same as -flags, shows this list of compiler options
+-xhelp=readme:        Show the README information file
+-xia[=<i>]:           Enable interval arithmetic with proper env, <i>= widestneed|strict
+-xildoff:             Cancel -xildon
+-xildon:              Enable use of the incremental linker, ild
+-xinline=[a,...,a]:   Same as -inline
+-xinterval[=<i>]:     Enable interval arithmetic, <i>= no|widestneed|strict
+-xlang=name{,name}:   The set of languages used in the program
+-xlibmil:             Same as -libmil
+-xlibmopt:            Link with optimized math library
+-xlic_lib=<l>:        Link with Sun supplied licensed libraries listed in <l>
+-xlicinfo:            Show license server information
+-xloopinfo:           Same as -loopinfo
+-xmaxopt[=<n>]:       Set highest optimization level for #pragma OPT
+-xmemalign[=<a><t>]:  Controls memory alignment, <a>={1|2|4|8|16}, b={f|i|s}.
+-xnolib:              Same as -nolib
+-xnolibmil:           Same as -nolibmil
+-xnolibmopt:          Cancel -xlibmopt on command line
+-xO<n>:               Same as -O<n>
+-xpad[=<p>]:          Same as -pad
+-xparallel:           Same as -parallel
+-xpg:                 Same as -pg
+-xpp[=<p>]:           Select preprocessor, <p>=fpp|cpp.
+-xprefetch[=<a>[,<a>]]: Enable UltraSPARC II and UltraSPARC III prefetch instructions, <a>=yes|no|auto|no%auto|explicit|no%explicit|latx:<n>.<n>
+-xprofile=collect:    Compile for profile feedback data collection
+-xprofile=tcov:       Compile for tcov basic block profiling (new format)
+-xprofile=use:        Optimize with runtime profile data feedback
+-xrecursive:          Allow recursive calls
+-xreduction:          Same as -reduction
+-xregs=<r1>[,...<rn>]: Specify the usage of optional registers
+-xs:                  Allow debugging without object (.o) files
+-xsafe=mem:           Assume that no memory based traps will occur
+-xsb:                 Same as -sb
+-xsbfast:             Same as -sbfast
+-xspace:              Do not do optimizations that increase code size
+-xtarget=<t>:         Specify target system for optimization
+-xtime:               Same as -time
+-xtypemap=<s>:        Specify default data mappings
+-xunroll=<n>:         Same as -unroll
+-xvector[=<a>]:       Generate calls to vector library functions, <a>=yes|no 
+-Zlp:                 Compile for looptool profiling
+-z <x>:               Link editor option
+All other options are passed down to ld.
+
+Suffix 'a':           Object library
+Suffix 'il':          Inline expansion file
+Suffix 'o':           Object file
+Suffix 'so':          Shared object
+Suffix 's':           Assembler source
+Suffix 'S':           Assembler source for cpp
+Suffix 'for':         f90 source (Fixed Form)
+Suffix 'ftn':         f90 source (Fixed Form)
+Suffix 'f':           f90 source (Fixed Form)
+Suffix 'F':           not currently recognized
+Suffix 'f90':         f90 source (Free Form)
+Suffix 'F90':         f90 source (Free Form)
+Suffix 'f95':         f95 source (Free Form)
+Suffix 'F95':         f95 source (Free Form)
+Suffix 'lst':         f90 listing
+Suffix 'T':           Intermediate file
+
+For additional product information or the name of a Sun software reseller,
+please call 1-800-786-7638, or (+1) 512-434-1511 (outside the US),
+or fax your request to (+1) 512-218-3866.
+
+For technical support, please contact your Sun software reseller for the name of an
+Authorized Service Provider.
+
+For more information, please browse http://www.sun.com/workshop
+

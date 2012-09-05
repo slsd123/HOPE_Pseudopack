@@ -1,0 +1,7 @@
+#!/bin/csh
+
+mkdir $1
+rm -rf $1/Output $1/Restart $1/Executable $1/Input $1/clean
+cp -rf Executable Input clean $1/
+mkdir $1/Output $1/Restart
+chmod 700 $1/clean

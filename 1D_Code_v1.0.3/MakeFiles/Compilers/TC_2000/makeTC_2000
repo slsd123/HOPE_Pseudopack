@@ -1,0 +1,42 @@
+ifeq ($(strip $(SITE_ID)),LLNL)
+  COMPILER_PATH = 
+
+  C_COMPILER    = 
+  F_COMPILER    = newf95
+
+  LIB_PATH      =
+
+ ifeq ($(strip $(MACHINE_NAME)),tc2k)
+  LIB           = -lfmpi -lmpi -lelan -lelan3
+ endif
+ ifeq ($(strip $(MACHINE_NAME)),gps)
+  LIB           = -lfmpi -lmpi
+ endif
+endif
+
+#-----------------------------------------------------------
+#
+ CC             = $(C_COMPILER)
+ C_COMPILEFLAGS =
+
+ FF             = $(F_COMPILER)
+ F_COMPILEFLAGS =
+
+ LD             = $(FF)
+ LOADERFLAGS    =
+
+ LIBLOC         = $(LIB_PATH)
+ LIB            = $(LIB)
+
+#-----------------------------------------------------------------------
+# Visus streaming system
+
+VISUSDIR  = 
+VISUSLIBS =
+VISUSOBJS =
+  
+ifeq ($(VISUS),on)
+  VISUSDIR  = ~/miranda/visus
+  VISUSLIBS = -lz
+  VISUSOBJS = visus_stream.o $(VISUSDIR)/lib/$(MACHINE_NAME)/libvisus_producer.a
+endif

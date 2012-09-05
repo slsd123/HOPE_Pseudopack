@@ -1,0 +1,21 @@
+  COMPILER_PATH =
+# COMPILER_ALT  =
+
+  C_COMPILER    = $(COMPILER_PATH)cc
+  F_COMPILER    = $(COMPILER_PATH)f95 $(COMPILER_ALT)
+
+  L_PATH        = 
+  L_LIB         =
+
+#--------------------------------------------------------------------
+#
+ CC              = $(C_COMPILER)
+ C_COMPILER_FLAG =
+
+ FF              = $(F_COMPILER)
+ F_COMPILER_FLAG =
+
+ LD              = $(FF)
+ LOADER_FLAG     =
+
+ LIB             = $(L_PATH) $(L_LIB)

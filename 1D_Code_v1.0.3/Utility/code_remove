@@ -1,0 +1,9 @@
+rm -rf Executable
+rm -rf Output
+rm -rf Restart
+rm -rf Object
+rm -rf Listing
+rm -rf Module
+rm -rf clean
+rm -rf code_setup
+rm -rf code_remove

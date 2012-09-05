@@ -1,0 +1,28 @@
+ifeq ($(strip $(SITE_ID)),Brown_DAM_SCG)
+ ifeq ($(strip $(MACHINE_NAME)),wsdon-opt)
+  PARALLEL_OR_SERIAL = Serial
+
+  COMPILER_PATH = /usr/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)gfortran
+  F_COMPILER    = $(COMPILER_PATH)gfortran
+
+  L_PATH        = 
+  L_LIB         = 
+ endif
+
+  L_LIB        += 
+endif
+
+#--------------------------------------------------------------------
+
+ CC              = $(C_COMPILER)
+ C_COMPILER_FLAG = 
+
+ FF              = $(F_COMPILER)
+ F_COMPILER_FLAG = 
+
+ LD              = $(FF)
+ LOADER_FLAG     = 
+
+ LIB             = $(L_PATH) $(L_LIB)

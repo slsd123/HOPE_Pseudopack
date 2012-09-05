@@ -1,0 +1,101 @@
+body,table {
+	padding: 0;
+	font-family: verdana, helvetica, arial, sans-serif;
+	font-size: 12px;
+	background-color: #fff; 
+	color: #333;
+}
+
+body {
+	margin: 10px 10px 10px 136px;
+	background-image: url(/style/bg.gif);
+	background-repeat: repeat-y;
+	background-position: top left;
+}
+
+#content { 
+	margin: 0;
+	padding: 0;
+}
+
+#menu {
+	text-align: left;
+	color: #999;
+	background-color: #600;
+	border: none 1px #600;
+	border-bottom: 1px #000 dashed;
+	margin: 0 0 0 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 4px 0 4px 4px; 
+	width: 116px;
+}
+
+b, strong { font-weight: bold }
+i { font-style: italic }
+a { text-decoration: none; color: #600 }
+a:hover { text-decoration: underline; color: #000 }
+hr {
+	height: 1px;
+	border: 0;
+	color: #600;
+	background-color: #600;
+}
+h1 { 
+	text-align: left;
+	font-size: 1.75em;
+	margin-top: 0;
+        border-bottom: #600 solid 2px;
+	line-height: 125%;
+}
+h2 { font-size: 1.25em; }
+img { border-width: 0 }
+input { border-color: #999 }
+pre,tt { font-family: monospace }
+
+#menu a { color: #fff; display: block; padding-left: 8px; text-indent: -8px }
+#menu a:hover { background-color: #933; text-decoration: none }
+#menu dl { margin: 8px 0 8px 4px; padding-left: 0; text-align: left }
+#menu dd { margin: 0 0 0 8px; padding-left: 0 }
+#menu dt { font-size: 1.25em }
+#menu input { background-color: #fcc; border-color: #fcc; width: 92px }
+#menu label { font-size: .75em; margin-top: 1.5em; display: block }
+#news { margin: 1em 0; padding: .5em; background-color: #eee; }
+#news ul { margin: 0; padding: 0 }
+#news li { list-style-type: none; margin: 0; padding: 0 0 0 4em; text-indent: -4em }
+.center { text-align: center }
+.source { font-size: .75em; font-style: italic; }
+.even { background-color: #fee; }
+.odd { background-color: #eee; }
+.sidebar,.code { background-color: #fee; border: solid 1px #600; padding: .5em 1em }
+
+#menu {
+        width: 116px;
+	/* For IE5/Win's benefit width = [correct width] + [padding] + [border widths] */
+	voice-family: "\"}\"";
+	voice-family: inherit;
+	width: 120px;
+}
+#menu iframe {
+	margin: 1em 0 1em -3px;
+	padding: 2px 1px;
+/*	border: solid 1px #666; */
+        width: 120px;
+}
+#admenu iframe { background-color: #fff; height: 600px }
+#adlink iframe { background-color: #600; height: 100px }
+#admiddle iframe { border: solid 1px #600; padding: 2px; margin: .5em 3em }
+#adbottom iframe { border: solid 1px #600; padding: 2px; margin: 1em 0 }
+#adright { float: right; margin: 0 0 .5em .5em; }
+#adright iframe { width: 300px; height: 275px; }
+
+/* be nice to Opera 5 */
+body>#Menu { width: 116px }
+
+@media print
+{
+	body { margin: 0px; color: #000; background-image: none }
+	a { text-decoration: underline }
+	#menu { display: none }
+}

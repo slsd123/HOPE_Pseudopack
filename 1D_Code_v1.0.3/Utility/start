@@ -1,0 +1,5 @@
+rm -rf Output
+rm -rf Restart
+
+mkdir Output
+mkdir Restart

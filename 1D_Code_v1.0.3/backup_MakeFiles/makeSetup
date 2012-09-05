@@ -1,0 +1,77 @@
+#=========================================================================
+#  PROGRAM Directories Setup
+
+PROGRAM_DIR = Executable Object Module Listing 
+
+makefile_update:
+	cp -rp $(PS_MAIN_PATH)/$(MAKE_DIR)/Compilers $(MAKE_DIR)/.
+	cp -f  $(PS_MAIN_PATH)/$(MAKE_DIR)/makeMachine $(MAKE_DIR)/.
+
+compiler_update:
+	cp -rp $(PS_MAIN_PATH)/$(MAKE_PATH)/* $(MAKE_PATH)/.
+	cp -f  $(PS_MAIN_PATH)/$(MAKE_DIR)/makeMachine $(MAKE_DIR)/.
+
+program_Install:
+	for Sub_0 in $(PROGRAM_DIR); do \
+	  echo Creating Directory ..... $$Sub_0                    ; \
+	  $(KILL)    $$Sub_0; \
+	  $(MAKEDIR) $$Sub_0; \
+	done
+
+program_Remove :
+	for Sub_0 in $(PROGRAM_DIR); do \
+	  echo Removing Directory ..... $$Sub_0                    ; \
+	  $(KILL)    $$Sub_0; \
+	done
+
+program_Clean:
+	for Sub_0 in $(PROGRAM_DIR); do \
+	  echo Removing Directory ..... $$Sub_0                    ; \
+	  $(KILL)    $$Sub_0/*; \
+	done
+
+System_Info:
+	@echo 
+	@echo ----- Compiling Program : Begin ---
+	@echo 
+	@echo Site ID  \ \ \ \ \ \ \ \ \  : $(SITE_ID)
+	@echo Machine Type \ \ \ \ \ : $(MACHINE_TYPE)
+	@echo Machine Name \ \ \ \ \ : $(MACHINE_NAME)
+	@echo Machine Processor : $(MACHINE_PROCESSOR)
+	@echo Machine OS      \ \ \ \ \ \  : $(MACHINE_OS)
+	@echo Machine Compiler \ : $(MACHINE_COMPILER)
+	@echo Machine ID      \ \ \ \ \ \  : $(MACHINE_ID)
+	@echo
+	@echo Program Name : $(EXECUTABLE)
+	@echo Program Path : $(CURDIR)
+	@echo
+	@echo Compiler \ \ \ \ : $(FF)
+	@echo Compile Flag : $(F_COMPILER_FLAG)
+	@echo
+	@echo 
+
+System_Done:
+	@echo 
+	@echo ----- Compiling Program : Done  ---
+	@echo 
+
+Directory_Check:
+	@if (test ! -d Executable); then                               \
+	 (echo ----- Install Directories : BEGIN ----                ; \
+	  echo                                                       ; \
+	  for Sub_0 in $(PROGRAM_DIR); do                              \
+	    echo Creating Directory ..... $$Sub_0                    ; \
+	    $(MAKEDIR) $$Sub_0                                     ; \
+	  done                                                       ; \
+	  echo                                                       ; \
+	  echo -----                        DONE  ----               ; \
+	  echo                                                     ) ; \
+	fi
+
+Tar_List   = Source MakeFiles Utility Include makeprogram
+Tar_Source = $(Tar_List:%=$(PROGRAM_PATH)%)
+
+program_Tar:
+	tar -cvf $(Tar_DIR)$(Tar_Filename).tar $(Tar_Source)
+	gzip     $(Tar_DIR)$(Tar_Filename).tar
+

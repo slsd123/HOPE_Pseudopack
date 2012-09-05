@@ -1,0 +1,6 @@
+mkdir Executable
+mkdir Output
+mkdir Restart
+mkdir Object
+mkdir Listing
+mkdir Module

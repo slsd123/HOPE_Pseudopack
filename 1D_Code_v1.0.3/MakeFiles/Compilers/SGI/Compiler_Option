@@ -1,0 +1,64 @@
+#=========================================================================
+#               ---- Compiler Optimization Flag ----
+
+DoublePrecision   = -r8
+
+Processor         = 
+Math_Library      = 
+HostOptimize      = $(Processor)
+
+FixedForm         = -fixedform
+FreeForm          = -freeform
+Extended_Source   = -extend_source
+
+p_Profiling       = -p 
+g_Profiling       = -pg
+
+Implicit_None     = -u
+Bound_Check       = -C
+
+Multi_Defined     = -Wl,-woff,15
+Keep_Files        = -keep
+
+#=========================================================================
+#               ---- Compiler Debug Flag ----
+
+ifeq ($(strip $(DEBUG)),on)
+ Optimization     =
+
+ Debug            = -g 
+ Listing          = -listing
+else
+ Optimization     = -O$(OPTIMIZATION_LEVEL) $(HostOptimize)
+endif
+
+ifeq ($(WARNING),on)
+ Message_Level    = -w4
+endif
+
+#=========================================================================
+#               ---- CPP ----
+
+PreProcessor      = -macro_expand
+CPP               = -D
+CPP_ONLY          = -P
+
+
+
+
+
+#=========================================================================
+#               ---- SGI  Architecture ----
+
+BIT_32           = -n32
+BIT_64           = -64
+
+R10000           = -r10000
+R8000            = -r8000
+R4000            = -r4000
+
+MIPS3            = -mips3
+MIPS4            = -mips4
+
+Platform         = IP30
+

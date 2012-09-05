@@ -1,0 +1,22 @@
+ COMPILER_PATH = /sparc_soft/SUNWspro6U1/bin/
+
+ C_COMPILER    = $(COMPILER_PATH)cc
+ F_COMPILER    = $(COMPILER_PATH)f95
+
+ LIB_PATH      = 
+ LIB           = 
+
+#--------------------------------------------------
+#
+
+ CC             = $(C_COMPILER)
+ C_COMPILE_FLAG =
+
+ FF             = $(F_COMPILER)
+ F_COMPILE_FLAG =
+
+ LD             = $(FF)
+ LOADERFLAG     =
+
+ LIBLOC         = 
+ LIBS           = $(LIB)

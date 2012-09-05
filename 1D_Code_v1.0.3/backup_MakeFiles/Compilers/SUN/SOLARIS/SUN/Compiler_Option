@@ -1,0 +1,51 @@
+#=========================================================================
+#               ---- Compiler Optimization Flag ----
+
+     General_Flag  = -free
+     General_Flag += -r8const
+     General_Flag += -zmuldefs 
+
+ Optimization_Flag  = 
+ Optimization_Flag += -fast 
+
+     OPEN_MP_Flag  = -openmp -qsmp=noauto
+    Parallel_Flag  = -parallel
+
+         CPP_Flag  = -xpp=cpp
+
+         MPI_Flag  =
+     Library_Flag  = -xlibmopt -libmil
+
+        Info_Flag  = -w4
+
+ifeq ($(strip $(DEBUG)),on)
+  Optimization_Flag  =
+endif
+
+         Debug_Flag  = -g -C -u
+         Debug_Flag += -Xlist -keeptmp
+
+       Profile_Flag  = -p
+       Profile_Flag += -pg
+
+         MOD_OPTION  = -M
+
+#=========================================================================
+#               ---- CPP ----
+
+CPP                = -D
+CPP_ONLY           = -F
+Debug_Line         = -d_lines
+
+#=========================================================================
+#               ---- Loader ----
+
+Loader_Phase        =
+
+#=========================================================================
+#               ---- Compiler_Option ----
+
+ F_COMPILER_FLAG  = $(General_Flag) $(CPP_Flag)
+ F_COMPILER_FLAG += $(Optimization_Flag)
+ F_COMPILER_FLAG += $(Library_Flag)
+     LOADER_FLAG  =

@@ -1,0 +1,30 @@
+ifeq ($(strip $(SITE_ID)),Brown_DAM_SCG)
+ ifeq ($(strip $(MACHINE_NAME)),wsdon-opt)
+  PARALLEL_OR_SERIAL = Serial
+
+# COMPILER_PATH = /share/dam/packages/pgi615/linux86-64/6.1/bin/
+# COMPILER_PATH = /share/dam/packages/pgi625/linux86-64/6.2/bin/
+  COMPILER_PATH = /share/dam/packages/pgi704/linux86-64/7.0-4/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)pgCC
+  F_COMPILER    = $(COMPILER_PATH)pgf95
+
+  L_PATH        = 
+  L_LIB         = 
+ endif
+
+  L_LIB        += -lacml -llapack -lblas 
+endif
+
+#--------------------------------------------------------------------
+
+ CC              = $(C_COMPILER)
+ C_COMPILER_FLAG = 
+
+ FF              = $(F_COMPILER)
+ F_COMPILER_FLAG = 
+
+ LD              = $(FF)
+ LOADER_FLAG     = 
+
+ LIB             = $(L_PATH) $(L_LIB)

@@ -1,0 +1,10 @@
+#!/bin/csh
+
+alias rm rm -rf
+
+rm -rf core*
+rm -rf Output/*.dat
+rm -rf Output/Misc/*
+rm -rf Output/Plot/*
+rm -rf Output/Movie/*
+rm -rf Output/Restart/*

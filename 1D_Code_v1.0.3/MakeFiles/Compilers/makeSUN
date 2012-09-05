@@ -1,0 +1,31 @@
+#=========================================================================
+#               ---- Math Library ----
+
+MATH_LIBRARY =
+
+#=========================================================================
+# Compiler Option
+
+ifeq ($(strip $(MACHINE_OS)),SOLARIS)
+ MOD_PATH  = $(MOD_OPTION)$(PS_MODDIR)
+ SRC_PATH  = -I$(SRCDIR) $(SUBDIR:%=-I$(SRCDIR)%) -I$(PS_HDRDIR)
+endif
+
+ ADD_OPTION  = $(MATH_LIBRARY)
+
+#-------------------------------------------------------------------------
+ifeq ($(strip $(PROFILE)),on)
+ ADD_OPTION += $(Profile_Flag)
+endif
+
+ifeq ($(strip $(DEBUG)),on)
+ ADD_OPTION += $(Debug_Flag)
+endif
+
+ifeq ($(strip $(WARNING)),on)
+ ADD_OPTION += $(Info_Flag)
+endif
+
+#-------------------------------------------------------------------------
+ADD_Option +=
+

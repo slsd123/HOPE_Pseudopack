@@ -1,0 +1,655 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en"><head><title>gfortran(1): GNU Fortran 95 compiler - Linux man page</title>
+
+
+
+
+
+<script type="text/javascript">
+<!--
+if (top.location != self.location) top.location = self.location;
+// -->
+</script>
+<link rel="stylesheet" type="text/css" href="gfortran.1_files/white.css">
+<link rel="shortcut icon" href="http://www.die.net/favicon.ico" type="image/x-icon"></head><body alink="#000000" bgcolor="#ffffff" link="#660000" text="#333333" vlink="#660000">
+<div id="content">
+
+<!-- google_ad_section_start -->
+<h1>gfortran(1) - Linux man page</h1>
+
+
+<div id="adright">
+<script language="JavaScript"><!--
+google_ad_client = 'pub-5823754184406795';
+google_alternate_ad_url = "http://ads.die.net/?url=http://www.die.net/doc/linux/man/man1/gfortran.1.html&type=right";
+google_ad_width = 336;
+google_ad_height = 280;
+google_ad_format = "336x280_as";
+google_ad_type = "text_image";
+google_ad_channel ="2512342691";
+google_color_border = ["F7F7F7","FFF7F7"];
+google_color_bg = ["F7F7F7","FFF7F7"];
+google_color_link = "660000";
+google_color_url = "660000";
+google_color_text = "333333";
+// --></script>
+<script language="JavaScript" src="gfortran.1_files/show_ads.js">
+</script><iframe name="google_ads_frame" src="gfortran.1_files/ads." marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" frameborder="0" height="280" scrolling="no" width="336"></iframe>
+</div>
+
+
+
+
+<h2>NAME<a name="name">&nbsp;</a></h2>
+gfortran - GNU Fortran 95 compiler
+
+<h2>SYNOPSIS<a name="synopsis">&nbsp;</a></h2>
+ gfortran
+[<b>-c</b>|<b>-S</b>|<b>-E</b>]
+         [<b>-g</b>] [<b>
+-pg</b>] [<b>-O</b><i>level</i>]
+         [<b>-W</b><i>warn</i>...] [<b>
+-pedantic</b>]
+         [<b>-I</b><i>dir</i>...] [<b>
+-L</b><i>dir</i>...]
+         [<b>-D</b><i>macro</i>[=<i>
+defn</i>]...] [<b>-U</b><i>macro</i>]
+         [<b>-f</b><i>option</i>...]
+<tt>        </tt>
+[<b>-m</b><i>machine-option</i>...]
+
+         [<b>-o</b> <i>
+outfile</i>] <i>infile</i>...
+<p>Only the most useful options are listed here; see below for the
+remainder.
+
+</p><h2>DESCRIPTION<a name="description">&nbsp;</a></h2>
+ The <b>gfortran</b>
+command supports all the options supported by the <b>gcc</b>
+command. Only options specific to gfortran are documented here.
+<p>All <b>gcc</b> and <b>gfortran</b> options are accepted both by
+<b>gfortran</b> and by <b>gcc</b> (as well as any other drivers
+built at the same time, such as <b>g++</b>), since adding
+<b>gfortran</b> to the <b>gcc</b> distribution enables acceptance
+of <b>gfortran</b> options by all of the relevant drivers.
+</p><p>In some cases, options have positive and negative forms; the
+negative form of <b>-ffoo</b> would be <b>-fno-foo</b>. This manual
+documents only one of these two forms, whichever one is not the
+default.
+
+</p><h2>OPTIONS<a name="options">&nbsp;</a></h2>
+ Here is a summary of all the
+options specific to <font size="-1">GNU</font> Fortran, grouped by
+type. Explanations are in the following sections.
+<dl compact="compact">
+<dt><i>Fortran Language Options</i>
+</dt><dd> <b>-ffree-form -fno-fixed-form -fdollar-ok
+-fimplicit-none -fmax-identifier-length -std=</b><i>std</i>
+<b>-fd-lines-as-code -fd-lines-as-comments
+-ffixed-line-length-</b><i>n</i> <b>-ffixed-line-length-none
+-ffree-line-length-</b><i>n</i> <b>-ffree-line-length-none
+-fdefault-double-8 -fdefault-integer-8 -fdefault-real-8
+-fcray-pointer -fopenmp -frange-check</b>
+</dd><dt><i>Warning Options</i>
+</dt><dd> <b>-fsyntax-only -pedantic
+-pedantic-errors -w -Wall -Waliasing -Wampersand -Wconversion
+-Wimplicit-interface -Wnonstd-intrinsics -Wsurprising -Wunderflow
+-Wunused-labels -Wline-truncation -W</b>
+</dd><dt><i>Debugging Options</i>
+</dt><dd> <b>-fdump-parse-tree
+-ffpe-trap=</b><i>list</i>
+</dd><dt><i>Directory Options</i>
+</dt><dd> <b>-I</b><i>dir</i> <b>-M</b><i>dir</i>
+</dd><dt><i>Runtime Options</i>
+</dt><dd> <b>-fconvert=</b><i>conversion</i>
+<b>-frecord-marker=</b><i>length</i>
+</dd><dt><i>Code Generation Options</i>
+</dt><dd> <b>-fno-automatic -ff2c -fno-underscoring
+-fsecond-underscore -fbounds-check
+-fmax-stack-var-size=</b><i>n</i> <b>-fpackderived -frepack-arrays
+-fshort-enums</b></dd></dl>
+
+<h2>Options Controlling Fortran Dialect<a name="options">&nbsp;</a></h2>
+
+The following options control the dialect of Fortran that the
+compiler accepts:
+<dl compact="compact">
+<dt><b>-ffree-form</b>
+</dt><dd>
+</dd><dt><b>-ffixed-form</b>
+</dt><dd> Specify the layout used by the source
+file. The free form layout was introduced in Fortran 90. Fixed form
+was traditionally used in older Fortran programs.
+</dd><dt><b>-fd-lines-as-code</b>
+</dt><dd>
+</dd><dt><b>-fd-lines-as-comment</b>
+</dt><dd> Enables special treating for lines with
+<b>d</b> or <b>D</b> in fixed form sources. If the
+<b>-fd-lines-as-code</b> option is given they are treated as if the
+first column contained a blank. If the <b>-fd-lines-as-comments</b>
+option is given, they are treated as comment lines.
+</dd><dt><b>-fdefault-double-8</b>
+</dt><dd> Set the ``<font size="-1">DOUBLE</font>
+<font size="-1">PRECISION</font>'' type to an 8 byte wide.
+</dd><dt><b>-fdefault-integer-8</b>
+</dt><dd> Set the default integer and logical types
+to an 8 byte wide type. Do nothing if this is already the default.
+</dd><dt><b>-fdefault-real-8</b>
+</dt><dd> Set the default real type to an 8 byte
+wide type. Do nothing if this is already the default.
+</dd><dt><b>-fdollar-ok</b>
+</dt><dd> Allow <b>$</b> as a valid character in a
+symbol name.
+</dd><dt><b>-fno-backslash</b>
+</dt><dd> Compile switch to change the
+interpretation of a backslash from ``C''-style escape characters to
+a single backslash character.
+</dd><dt><b>-ffixed-line-length-</b><i>n</i>
+</dt><dd> Set column after which characters are
+ignored in typical fixed-form lines in the source file, and through
+which spaces are assumed (as if padded to that length) after the
+ends of short fixed-form lines.
+<p>Popular values for <i>n</i> include 72 (the standard and the
+default), 80 (card image), and 132 (corresponds to
+``extended-source'' options in some popular compilers). <i>n</i>
+may be <b>none</b>, meaning that the entire line is meaningful and
+that continued character constants never have implicit spaces
+appended to them to fill out the line. <b>-ffixed-line-length-0</b>
+means the same thing as <b>-ffixed-line-length-none</b>.
+</p></dd><dt><b>-ffree-line-length-</b><i>n</i>
+</dt><dd> Set column after which characters are
+ignored in typical free-form lines in the source file. For
+free-form, the default value is 132. <i>n</i> may be <b>none</b>,
+meaning that the entire line is meaningful.
+<b>-ffree-line-length-0</b> means the same thing as
+<b>-ffree-line-length-none</b>.
+</dd><dt><b>-fmax-identifier-length=</b><i>n</i>
+</dt><dd> Specify the maximum allowed identifier
+length. Typical values are 31 (Fortran 95) and 63 (Fortran 200x).
+</dd><dt><b>-fimplicit-none</b>
+</dt><dd> Specify that no implicit typing is
+allowed, unless overridden by explicit <font size="-1"><b>IMPLICIT</b></font> statements. This is the equivalent of
+adding <b>implicit none</b> to the start of every procedure.
+</dd><dt><b>-fcray-pointer</b>
+</dt><dd> Enables the Cray pointer extension, which
+provides a C-like pointer.
+</dd><dt><b>-fopenmp</b>
+</dt><dd> Enables handling of OpenMP
+<tt>"!$omp"</tt> directives in free form and <tt>"c$omp"</tt>,
+<tt>*$omp</tt> and <tt>"!$omp"</tt> directives in fixed form,
+enables <tt>"!$"</tt> conditional compilation sentinels in free
+form and <tt>"c$"</tt>, <tt>"*$"</tt> and <tt>"!$"</tt> sentinels
+in fixed form and when linking arranges for the OpenMP runtime
+library to be linked in.
+</dd><dt><b>-frange-check</b>
+</dt><dd> Enable range checking on results of
+simplification of constant expressions during compilation. For
+example, by default, <b>gfortran</b> will give an overflow error at
+compile time when simplifying <tt>"a = EXP(1000)"</tt>. With
+<b>-fno-range-check</b>, no error will be given and the variable
+<tt>"a"</tt> will be assigned the value <tt>"+Infinity"</tt>.
+</dd><dt><b>-std=</b><i>std</i>
+</dt><dd> Conform to the specified standard. Allowed
+values for <i>std</i> are <b>gnu</b>, <b>f95</b>, <b>f2003</b> and
+<b>legacy</b>.</dd></dl>
+
+<h2>Options to Request or Suppress Warnings<a name="options">&nbsp;</a></h2>
+ Warnings are diagnostic messages that report
+constructions which are not inherently erroneous but which are
+risky or suggest there might have been an error.
+<p>You can request many specific warnings with options beginning
+<b>-W</b>, for example <b>-Wimplicit</b> to request warnings on
+implicit declarations. Each of these specific warning options also
+has a negative form beginning <b>-Wno-</b> to turn off warnings;
+for example, <b>-Wno-implicit</b>. This manual lists only one of
+the two forms, whichever is not the default.
+</p><p>These options control the amount and kinds of warnings produced
+by <font size="-1">GNU</font> Fortran:
+</p><dl compact="compact">
+<dt><b>-fsyntax-only</b>
+</dt><dd> Check the code for syntax errors, but
+don't do anything beyond that.
+</dd><dt><b>-pedantic</b>
+</dt><dd> Issue warnings for uses of extensions to
+<font size="-1">FORTRAN</font> 95. <b>-pedantic</b> also applies to
+C-language constructs where they occur in <font size="-1">GNU</font> Fortran source files, such as use of <b>\e</b> in a
+character constant within a directive like <b>#include</b>.
+<p>Valid <font size="-1">FORTRAN</font> 95 programs should compile
+properly with or without this option. However, without this option,
+certain <font size="-1">GNU</font> extensions and traditional
+Fortran features are supported as well. With this option, many of
+them are rejected.
+</p><p>Some users try to use <b>-pedantic</b> to check programs for
+conformance. They soon find that it does not do quite what they
+want---it finds some nonstandard practices, but not all. However,
+improvements to <b>gfortran</b> in this area are welcome.
+</p><p>This should be used in conjunction with -std=<i>std</i>.
+</p></dd><dt><b>-pedantic-errors</b>
+</dt><dd> Like <b>-pedantic</b>, except that errors
+are produced rather than warnings.
+</dd><dt><b>-w</b>
+</dt><dd> Inhibit all warning messages.
+</dd><dt><b>-Wall</b>
+</dt><dd> Enables commonly used warning options
+pertaining to usage that we recommend avoiding and that we believe
+are easy to avoid. This currently includes <b>-Wunused-labels</b>,
+<b>-Waliasing</b>, <b>-Wampersand</b>, <b>-Wsurprising</b>,
+<b>-Wnonstd-intrinsic</b>, and <b>-Wline-truncation</b>.
+</dd><dt><b>-Waliasing</b>
+</dt><dd> Warn about possible aliasing of dummy
+arguments. Specifically, it warns if the same actual argument is
+associated with a dummy argument with <tt>"intent(in)"</tt> and a
+dummy argument with <tt>"intent(out)"</tt> in a call with an
+explicit interface.
+<p>The following example will trigger the warning.
+</p><pre class="code">          interface
+            subroutine bar(a,b)
+              integer, intent(in) :: a
+              integer, intent(out) :: b
+            end subroutine
+          end interface
+          integer :: a
+
+          call bar(a,a)</pre>
+</dd><dt><b>-Wampersand</b>
+</dt><dd> Warn about missing ampersand in continued
+character literals. The warning is given with <b>-Wampersand</b>,
+<b>-pedantic</b>, and <b>-std=f95</b>. Note: With no ampersand
+given in a continued character literal, gfortran assumes
+continuation at the first non-comment, non-whitespace character.
+</dd><dt><b>-Wconversion</b>
+</dt><dd> Warn about implicit conversions between
+different types.
+</dd><dt><b>-Wimplicit-interface</b>
+</dt><dd> Warn about when procedure are called
+without an explicit interface. Note this only checks that an
+explicit interface is present. It does not check that the declared
+interfaces are consistent across program units.
+</dd><dt><b>-Wnonstd-intrinsic</b>
+</dt><dd> Warn if the user tries to use an intrinsic
+that does not belong to the standard the user has chosen via the
+-std option.
+</dd><dt><b>-Wsurprising</b>
+</dt><dd> Produce a warning when ``suspicious'' code
+constructs are encountered. While technically legal these usually
+indicate that an error has been made.
+<p>This currently produces a warning under the following
+circumstances:
+</p><dl compact="compact">
+<dd>
+<dl compact="compact">
+<dt>*
+</dt><dd>An <font size="-1">INTEGER</font> <font size="-1">SELECT</font>
+construct has a <font size="-1">CASE</font> that can never be
+matched as its lower value is greater than its upper value.
+</dd><dt>*
+</dt><dd>A <font size="-1">LOGICAL</font> <font size="-1">SELECT</font>
+construct has three <font size="-1">CASE</font>
+statements.</dd></dl></dd></dl>
+<dl compact="compact"></dl>
+</dd><dt><b>-Wunderflow</b>
+</dt><dd> Produce a warning when numerical constant
+expressions are encountered, which yield an <font size="-1">UNDERFLOW</font> during compilation.
+</dd><dt><b>-Wunused-labels</b>
+</dt><dd> Warn whenever a label is defined but never
+referenced.
+</dd><dt><b>-Werror</b>
+</dt><dd> Turns all warnings into errors.
+</dd><dt><b>-W</b>
+</dt><dd> Turns on ``extra warnings'' and, if
+optimization is specified via <b>-O</b>, the <b>-Wuninitialized</b>
+option. (This might change in future versions of
+<b>gfortran</b></dd></dl>
+<p>Some of these have no effect when compiling programs written in
+Fortran.
+</p><h2>Options for Debugging Your Program or <font size="-1">GNU</font> Fortran</h2>
+ <font size="-1">GNU</font> Fortran has various special options that are used
+for debugging either your program or <b>gfortran</b>
+<dl compact="compact">
+<dt><b>-fdump-parse-tree</b>
+</dt><dd> Output the internal parse tree before
+starting code generation. Only really useful for debugging gfortran
+itself.
+</dd><dt><b>-ffpe-trap=</b><i>list</i>
+</dt><dd> Specify a list of <font size="-1">IEEE</font> exceptions when a Floating Point Exception
+(<font size="-1">FPE</font>) should be raised. On most systems,
+this will result in a <font size="-1">SIGFPE</font> signal being
+sent and the program being interrupted, producing a core file
+useful for debugging. <i>list</i> is a (possibly empty)
+comma-separated list of the following <font size="-1">IEEE</font>
+exceptions: <b>invalid</b> (invalid floating point operation, such
+as <tt>"sqrt(-1.0)"</tt>), <b>zero</b> (division by zero),
+<b>overflow</b> (overflow in a floating point operation),
+<b>underflow</b> (underflow in a floating point operation),
+<b>precision</b> (loss of precision during operation) and
+<b>denormal</b> (operation produced a denormal denormal
+value).</dd></dl>
+
+<h2>Options for Directory Search<a name="options">&nbsp;</a></h2>
+ These
+options affect how <b>gfortran</b> searches for files specified by
+the <tt>"INCLUDE"</tt> directive and where it searches for
+previously compiled modules.
+<p>It also affects the search paths used by <b>cpp</b> when used to
+preprocess Fortran source.
+</p><dl compact="compact">
+<dt><b>-I</b><i>dir</i>
+</dt><dd> These affect interpretation of the
+<tt>"INCLUDE"</tt> directive (as well as of the <tt>"#include"</tt>
+directive of the <b>cpp</b> preprocessor).
+<p>Also note that the general behavior of <b>-I</b> and
+<tt>"INCLUDE"</tt> is pretty much the same as of <b>-I</b> with
+<tt>"#include"</tt> in the <b>cpp</b> preprocessor, with regard to
+looking for <i>header.gcc</i> files and other such things.
+</p><p>This path is also used to search for <b>.mod</b> files when
+previously compiled modules are required by a <tt>"USE"</tt>
+statement.
+</p></dd><dt><b>-M</b><i>dir</i>
+</dt><dd>
+</dd><dt><b>-J</b><i>dir</i>
+</dt><dd> This option specifies where to put
+<b>.mod</b> files for compiled modules. It is also added to the
+list of directories to searched by an <tt>"USE"</tt> statement.
+<p>The default is the current directory.
+</p><p><b>-J</b> is an alias for <b>-M</b> to avoid conflicts with
+existing <font size="-1">GCC</font> options.</p></dd></dl>
+
+<h2>Influencing runtime behavior<a name="influencing">&nbsp;</a></h2>
+ These
+options affect the runtime behavior of <b>gfortran</b>.
+<dl compact="compact">
+<dt><b>-fconvert=</b><i>conversion</i>
+</dt><dd> Specify the representation of data for
+unformatted files. Valid values for conversion are: <b>native</b>,
+the default; <b>swap</b>, swap between big- and little-endian;
+<b>big-endian</b>, use big-endian representation for unformatted
+files; <b>little-endian</b>, use little-endian representation for
+unformatted files.
+<p><i>This option has an effect only when used in the main program.
+The</i> "CONVERT" <i>specifier and the</i> <font size="-1"><i>GFORTRAN_CONVERT_UNIT</i></font> <i>environment variable
+override the default specified by -fconvert.</i>
+</p></dd><dt><b>-frecord-marker=</b><i>length</i>
+</dt><dd> Specify the length of record markers for
+unformatted files. Valid values for <i>length</i> are 4 and 8.
+Default is whatever <tt>"off_t"</tt> is specified to be on that
+particular system. Note that specifying <i>length</i> as 4 limits
+the record length of unformatted files to 2 <font size="-1">GB</font>. This option does not extend the maximum possible
+record length on systems where <tt>"off_t"</tt> is a four_byte
+quantity.</dd></dl>
+
+<h2>Options for Code Generation Conventions<a name="options">&nbsp;</a></h2>
+ These machine-independent options control the
+interface conventions used in code generation.
+<p>Most of them have both positive and negative forms; the negative
+form of <b>-ffoo</b> would be <b>-fno-foo</b>. In the table below,
+only one of the forms is listed---the one which is not the default.
+You can figure out the other form by either removing <b>no-</b> or
+adding it.
+</p><dl compact="compact">
+<dt><b>-fno-automatic</b>
+</dt><dd> Treat each program unit as if the
+<tt>"SAVE"</tt> statement was specified for every local variable
+and array referenced in it. Does not affect common blocks. (Some
+Fortran compilers provide this option under the name
+<b>-static</b>.)
+</dd><dt><b>-ff2c</b>
+</dt><dd> Generate code designed to be compatible
+with code generated by <b>g77</b> and <b>f2c</b>.
+<p>The calling conventions used by <b>g77</b> (originally
+implemented in <b>f2c</b>) require functions that return type
+default <tt>"REAL"</tt> to actually return the C type
+<tt>"double"</tt>, and functions that return type
+<tt>"COMPLEX"</tt> to return the values via an extra argument in
+the calling sequence that points to where to store the return
+value. Under the default <font size="-1">GNU</font> calling
+conventions, such functions simply return their results as they
+would in <font size="-1">GNU</font> C --- default <tt>"REAL"</tt>
+functions return the C type <tt>"float"</tt>, and
+<tt>"COMPLEX"</tt> functions return the <font size="-1">GNU</font>
+C type <tt>"complex"</tt>. Additionally, this option implies the
+<b>-fsecond-underscore</b> option, unless
+<b>-fno-second-underscore</b> is explicitly requested.
+</p><p>This does not affect the generation of code that interfaces with
+the <b>libgfortran</b> library.
+</p><p><i>Caution:</i> It is not a good idea to mix Fortran code
+compiled with <tt>"-ff2c"</tt> with code compiled with the default
+<tt>"-fno-f2c"</tt> calling conventions as, calling
+<tt>"COMPLEX"</tt> or default <tt>"REAL"</tt> functions between
+program parts which were compiled with different calling
+conventions will break at execution time.
+</p><p><i>Caution:</i> This will break code which passes intrinsic
+functions of type default <tt>"REAL"</tt> or <tt>"COMPLEX"</tt> as
+actual arguments, as the library implementations use the
+<b>-fno-f2c</b> calling conventions.
+</p></dd><dt><b>-fno-underscoring</b>
+</dt><dd> Do not transform names of entities
+specified in the Fortran source file by appending underscores to
+them.
+<p>With <b>-funderscoring</b> in effect, <b>gfortran</b> appends
+one underscore to external names with no underscores. This is done
+to ensure compatibility with code produced by many <font size="-1">UNIX</font> Fortran compilers.
+</p><p><i>Caution</i>: The default behavior of <b>gfortran</b> is
+incompatible with <b>f2c</b> and <b>g77</b>, please use the
+<b>-ff2c</b> option if you want object files compiled with
+<b>gfortran</b> to be compatible with object code created with
+these tools.
+</p><p>Use of <b>-fno-underscoring</b> is not recommended unless you
+are experimenting with issues such as integration of (<font size="-1">GNU</font>) Fortran into existing system environments
+(vis-a-vis existing libraries, tools, and so on).
+</p><p>For example, with <b>-funderscoring</b>, and assuming other
+defaults like <b>-fcase-lower</b> and that <b>j()</b> and
+max_count() are external functions while <b>my_var</b> and
+<b>lvar</b> are local variables, a statement like
+</p><pre class="code">        I = J() + MAX_COUNT (MY_VAR, LVAR)</pre>
+<p>is implemented as something akin to:
+</p><pre class="code">        i = j_() + max_count__(&amp;my_var__, &amp;lvar);</pre>
+<p>With <b>-fno-underscoring</b>, the same statement is implemented
+as:
+</p><pre class="code">        i = j() + max_count(&amp;my_var, &amp;lvar);</pre>
+<p>Use of <b>-fno-underscoring</b> allows direct specification of
+user-defined names while debugging and when interfacing
+<b>gfortran</b> code with other languages.
+</p><p>Note that just because the names match does <i>not</i> mean that
+the interface implemented by <b>gfortran</b> for an external name
+matches the interface implemented by some other language for that
+same name. That is, getting code produced by <b>gfortran</b> to
+link to code produced by some other compiler using this or any
+other method can be only a small part of the overall
+solution---getting the code generated by both compilers to agree on
+issues other than naming can require significant effort, and,
+unlike naming disagreements, linkers normally cannot detect
+disagreements in these other areas.
+</p><p>Also, note that with <b>-fno-underscoring</b>, the lack of
+appended underscores introduces the very real possibility that a
+user-defined external name will conflict with a name in a system
+library, which could make finding unresolved-reference bugs quite
+difficult in some cases---they might occur at program run time, and
+show up only as buggy behavior at run time.
+</p><p>In future versions of <b>gfortran</b> we hope to improve naming
+and linking issues so that debugging always involves using the
+names as they appear in the source, even if the names as seen by
+the linker are mangled to prevent accidental linking between
+procedures with incompatible interfaces.
+</p></dd><dt><b>-fsecond-underscore</b>
+</dt><dd> By default, <b>gfortran</b> appends an
+underscore to external names. If this option is used
+<b>gfortran</b> appends two underscores to names with underscores
+and one underscore to external names with no underscores.
+(<b>gfortran</b> also appends two underscores to internal names
+with underscores to avoid naming collisions with external names.
+<p>This option has no effect if <b>-fno-underscoring</b> is in
+effect. It is implied by the <b>-ff2c</b> option.
+</p><p>Otherwise, with this option, an external name such as
+<font size="-1"><b>MAX_COUNT</b></font> is implemented as a
+reference to the link-time external symbol <b>max_count__</b>,
+instead of <b>max_count_</b>. This is required for compatibility
+with <b>g77</b> and <b>f2c</b>, and is implied by use of the
+<b>-ff2c</b> option.
+</p></dd><dt><b>-fbounds-check</b>
+</dt><dd> Enable generation of run-time checks for
+array subscripts and against the declared minimum and maximum
+values. It also checks array indices for assumed and deferred shape
+arrays against the actual allocated bounds.
+<p>In the future this may also include other forms of checking, eg.
+checking substring references.
+</p></dd><dt><b>-fmax-stack-var-size=</b><i>n</i>
+</dt><dd> This option specifies the size in bytes of
+the largest array that will be put on the stack.
+<p>This option currently only affects local arrays declared with
+constant bounds, and may not apply to all character variables.
+Future versions of <b>gfortran</b> may improve this behavior.
+</p><p>The default value for <i>n</i> is 32768.
+</p></dd><dt><b>-fpackderived</b>
+</dt><dd> This option tells gfortran to pack derived
+type members as closely as possible. Code compiled with this option
+is likely to be incompatible with code compiled without this
+option, and may execute slower.
+</dd><dt><b>-frepack-arrays</b>
+</dt><dd> In some circumstances <b>gfortran</b> may
+pass assumed shape array sections via a descriptor describing a
+discontiguous area of memory. This option adds code to the function
+prologue to repack the data into a contiguous block at runtime.
+<p>This should result in faster accesses to the array. However it
+can introduce significant overhead to the function call, especially
+when the passed data is discontiguous.
+</p></dd><dt><b>-fshort-enums</b>
+</dt><dd> This option is provided for
+interoperability with C code that was compiled with the
+<b>-fshort-enums</b> option. It will make <b>gfortran</b> choose
+the smallest <tt>"INTEGER"</tt> kind a given enumerator set will
+fit in, and give all its enumerators this kind.</dd></dl>
+
+<h2>ENVIRONMENT<a name="environment">&nbsp;</a></h2>
+ <font size="-1">GNU</font>
+Fortran 95 currently does not make use of any environment variables
+to control its operation above and beyond those that affect the
+operation of <b>gcc</b>.
+
+<h2>BUGS<a name="bugs">&nbsp;</a></h2>
+ For instructions on reporting
+bugs, see &lt;<b><a href="http://gcc.gnu.org/bugs.html">http://gcc.gnu.org/bugs.html</a></b>&gt;.
+
+<h2>SEE ALSO<a name="see">&nbsp;</a></h2>
+ <i>gpl</i>(7),
+<i>gfdl</i>(7),
+<i>fsf-funding</i>(7),
+<i><a href="http://www.die.net/doc/linux/man/man1/cpp.1.html">cpp</a></i>(1),
+<i><a href="http://www.die.net/doc/linux/man/man1/gcov.1.html">gcov</a></i>(1),
+<i><a href="http://www.die.net/doc/linux/man/man1/gcc.1.html">gcc</a></i>(1),
+<i><a href="http://www.die.net/doc/linux/man/man1/as.1.html">as</a></i>(1),
+<i><a href="http://www.die.net/doc/linux/man/man1/ld.1.html">ld</a></i>(1),
+<i><a href="http://www.die.net/doc/linux/man/man1/gdb.1.html">gdb</a></i>(1),
+<i>adb</i>(1),
+<i>dbx</i>(1),
+<i>sdb</i>(1) and
+the Info entries for <i>gcc</i>, <i>cpp</i>, <i>gfortran</i>,
+<i>as</i>, <i>ld</i>, <i>binutils</i> and <i>gdb</i>.
+
+<h2>AUTHOR<a name="author">&nbsp;</a></h2>
+ See the Info entry for
+<b>gfortran</b> for contributors to <font size="-1">GCC</font> and
+<font size="-1">GFORTRAN</font>.
+
+<h2>COPYRIGHT<a name="copyright">&nbsp;</a></h2>
+ Copyright (c) 2004, 2005,
+2006 Free Software Foundation, Inc.
+<p>Permission is granted to copy, distribute and/or modify this
+document under the terms of the <font size="-1">GNU</font> Free
+Documentation License, Version 1.2 or any later version published
+by the Free Software Foundation; with the Invariant Sections being
+``<font size="-1">GNU</font> General Public License'' and ``Funding
+Free Software'', the Front-Cover texts being (a) (see below), and
+with the Back-Cover Texts being (b) (see below). A copy of the
+license is included in the <i>gfdl</i>(7) man
+page.
+</p><p>(a) The <font size="-1">FSF</font>'s Front-Cover Text is:
+</p><pre class="code">     A GNU Manual</pre>
+<p>(b) The <font size="-1">FSF</font>'s Back-Cover Text is:
+</p><pre class="code">     You have freedom to copy and modify this GNU Manual, like GNU
+     software.  Copies published by the Free Software Foundation raise
+     funds for GNU development.</pre>
+
+<!-- google_ad_section_end -->
+
+<div id="adbottom" class="ad">
+<script language="JavaScript"><!--
+google_ad_client = 'pub-5823754184406795';
+google_alternate_ad_url = "http://ads.die.net/?url=http://www.die.net/doc/linux/man/man1/gfortran.1.html&type=bottom";
+google_ad_width = 728;
+google_ad_height = 90;
+google_ad_format = "728x90_as";
+google_ad_channel ="2512342691";
+google_color_border = ["FFFFFF","F7F7F7","FFF7F7"];
+google_color_bg = ["FFFFFF","F7F7F7","FFF7F7"];
+google_color_link = "660000";
+google_color_url = "660000";
+google_color_text = "333333";
+// --></script>
+<script language="JavaScript" src="gfortran.1_files/show_ads.js">
+</script><iframe name="google_ads_frame" src="gfortran.1_files/ads_002." marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" frameborder="0" height="90" scrolling="no" width="728"></iframe>
+</div>
+
+
+
+</div>
+<div id="menu">
+
+<a href="http://www.die.net/"><img src="gfortran.1_files/logo.gif" alt="die.net" border="0" height="121" width="119"></a>
+
+
+<dl><dd>
+<form id="searchbox_010481055930024740680:oyi6cjh0aps" action="http://www.die.net/search/">
+<input name="cx" value="010481055930024740680:oyi6cjh0aps" type="hidden">
+<label><a href="http://www.die.net/search/">site search</a></label>
+<input name="q" size="10" type="text">
+<input name="sa" value="Search" type="hidden">
+<span style="font-family: Arial,Helvetica,sans-serif; font-size: 75%;">Google Custom Search</span>
+<input name="cof" value="FORID:9" type="hidden">
+</form>
+<script type="text/javascript">
+<!--
+document.forms["searchbox_010481055930024740680:oyi6cjh0aps"].action = "http://www.die.net/search/";
+// -->
+</script>
+</dd></dl>
+
+
+
+
+<dl>
+<dt>Library</dt>
+<dd><a href="http://dict.die.net/">online dictionary</a>
+
+</dd><dd><a href="http://www.die.net/doc/linux/man/">linux man pages</a>
+
+</dd><dd><a href="http://www.die.net/musings/page_load_time/">page load time</a>
+</dd></dl>
+<dl>
+<dt>Toys</dt>
+<dd><a href="http://www.die.net/earth/">world sunlight</a>
+</dd><dd><a href="http://www.die.net/moon/">moon phase</a>
+</dd><dd><a href="http://www.ishar.com/">free online rpg</a>
+</dd></dl>
+
+
+<dl>
+<dt><a href="http://www.die.net/doc/linux/man/man1/"><img src="gfortran.1_files/back.gif" alt="Back" border="0" height="22" width="20"></a>
+</dt></dl>
+<div id="adlink">
+<script language="JavaScript"><!--
+google_ad_client = 'pub-5823754184406795';
+google_alternate_ad_url = "http://ads.die.net/?url=http://www.die.net/doc/linux/man/man1/gfortran.1.html&type=link";
+google_ad_width = 120;
+google_ad_height = 90;
+google_ad_format = "120x90_0ads_al_s";
+google_ad_channel = "0926112970+2512342691";
+google_color_border = "666666";
+google_color_bg = "660000";
+google_color_link = "FFFFFF";
+google_color_url = "FFFFFF";
+google_color_text = "FFFFFF";
+// --></script>
+<script language="JavaScript" src="gfortran.1_files/show_ads.js">
+</script><iframe name="google_ads_frame" src="gfortran.1_files/ads_003." marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" frameborder="0" height="90" scrolling="no" width="120"></iframe>
+</div></div>
+</body></html>

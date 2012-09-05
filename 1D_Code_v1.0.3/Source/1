@@ -1,0 +1,1223 @@
+#include "pseudopack.h"
+
+Program SHOCK_TUBE_TEST_SUITE_WITH_WENO
+
+  USE PseudoPack
+  USE Domain_Definition
+
+implicit NONE
+
+integer          :: N_Frame       = 10
+integer          :: Shock_Type    = 0
+character(LEN=1) :: Variable_Type = 'C'
+integer          :: Shock_Profile = 0
+REALTYPE         :: Gamma         = 1.40d0
+REALTYPE         :: Mach          = 3.0d0
+REALTYPE         :: P_Ratio       = 1.0d0
+REALTYPE         :: Wave_Number   = 1.0d0
+REALTYPE         :: Amplitude     = 0.2d0
+REALTYPE         :: Begin_Time    = ZERO
+REALTYPE         :: Final_Time    = 1.0d-4
+integer          :: Step          = 0
+REALTYPE         :: Time          = ZERO
+integer          :: Restart       = 0
+integer          :: Central_Order = 6
+integer          :: Filter_Choice = 1
+integer          :: Filter_Order  = 6
+REALTYPE         :: Filter_Viscosity = 0.2
+
+REALTYPE, dimension(3)              :: Q_Left, Q_Right
+REALTYPE, ALLOCATABLE       :: Source1(:,:)
+
+integer  :: i, j
+
+REALTYPE :: Shock_Location, Shock_Speed, Shock_Position
+
+REALTYPE :: dt, dt_Original
+REALTYPE :: CPU_Begin, CPU_End, CPU_Start
+
+logical  :: Save_Indicator = .TRUE.
+REALTYPE :: Movie_Resolution = 0.10d0
+REALTYPE :: Next_Save_Time = 0.0d0
+
+REALTYPE ::     x_Left,   x_Right 
+REALTYPE ::   Rho_Left, Rho_Right
+REALTYPE ::     U_Left,   U_Right
+REALTYPE ::     P_Left,   P_Right
+REALTYPE ::     T_Left,   T_Right
+REALTYPE ::     C_Left,   C_Right
+
+REALTYPE :: MW_Gas_1=ZERO, Rho_Gas_1=ZERO, T_Pre_Shock=ZERO
+
+!------
+! Particle Stuff
+!------
+!INTEGER, PARAMETER                  :: Npart = 0
+INTEGER, PARAMETER                  :: Npart = 40000
+REALTYPE, dimension(Npart)          :: Xpart, Upart, Tpart, f1, f2
+REALTYPE, dimension(Npart)          :: Ufluid, Tfluid, dpdxfluid
+REALTYPE                            :: Stokes, dxpart
+REALTYPE                            :: TAUP0, RHOP, re, PD0, PM0, CRE,CF2, pr, pi, Rhofp
+INTEGER                             :: np, update_particle
+DOUBLE PRECISION                    :: Source_factor
+
+
+!------
+! Input Data
+!------
+call Input 
+
+call PS_Shock_Specification (Shock_Type, Variable_Type,                   &
+                             Mach, P_Ratio, MW_Gas_1, Gamma, Shock_Speed, &
+                             Rho_Left , U_Left , P_Left , T_Left ,        &
+                             Rho_Gas_1, U_Right, P_Right, T_Pre_Shock,    &
+                             Final_Time, x_Left, x_Right, Shock_Location, &
+                             C_Left, C_Right, Q_Left, Q_Right)
+write(*,*) 'Mach', Mach
+write(*,*) 'R U P left',Rho_Left, U_Left, P_Left
+
+
+!------
+! Setup Operators 
+!------
+
+call Domain_Setup
+call Index_Setup
+call Allocate_Variables
+call Operator_Setup
+
+ALLOCATE(Source1(N0:N5,NV))
+Source1 = 0.0
+
+!------
+! Setup Initial Shock Profile
+!------
+
+call Initial_Condition
+
+!------
+! Setup Initial Particle Conditions
+!------
+      Source_factor = 86000.0/DBLE(Npart)
+!      Source_factor = 0.0d0
+
+      pi     = 3.1415926535897932d0
+      !TAUP0  = 3.9296e03                         ! particle response time
+      TAUP0  = 1.7845e03                          ! particle response time
+      RHOP   = 1000.0                             ! non-dimensional particle density (ratio to fluid density)
+      !re     =  1.7638e06                        ! fluid Reynolds number (somewhat arbitrary as this is Euler solver)
+      re     =  9.6503e05 
+      pr     = 1.4
+      PD0    = dsqrt(18.0d0*TAUP0/(re*RHOP))      ! particle diameter
+
+      PM0    = pi*RHOP*PD0**3 /6.d0               ! particle mass
+write(*,*) 'PD0', PD0 
+!stop
+      Rhofp  = 1.0                                ! approximate fluid density at particle 
+      CRE    = re*Rhofp*PD0                       ! particle relative Reynolds number factor 
+      CF2    = 1.0d0/(3.0d0*pr)
+
+      TAUP0  = 1.7845e3/5e2                       ! particle response time
+
+      dxpart = (1.55e-2/52e-3)/DBLE(Npart-1)
+      DO np=1,Npart
+        Xpart(np) = ((0.0e-2)/52.0e-3) + DBLE(np-1)*dxpart
+      ENDDO
+
+        call Interpolate_Fluid_To_Particle(Xpart, Upart, Tpart, Npart, Q,  &
+                                      Ufluid, Tfluid, f1, f2,dpdxfluid)
+
+      DO np=1,Npart
+        !Upart(np) = Ufluid(np)*2.0
+        Upart(np) = Ufluid(np)
+        Tpart(np) = Tfluid(np)
+!write(*,*) Tpart(np)
+      ENDDO
+
+
+      update_particle = 1
+!stop
+
+!
+
+if (Restart /= 0) then
+  call Read_Restart_File  ; dt = dt_Original
+else
+  Step = 0 ; Time = ZERO
+
+  call PS_Euler_Time_Step (x, Q, Gamma, CFL, dt) ; dt_Original = dt
+endif
+
+Next_Save_Time = Time +  Movie_Resolution
+
+                        call TecPlot (0, Step, Time)
+call Riemann_Solution ; call TecPlot (1, Step, Time) 
+
+write (6,*)
+write (6,*) 'Estimate Number of Time Step : ',INT((Final_Time-Time)/dt),dt
+write (6,*)
+write (6,1000)
+write (6,1001) INT((Final_Time-Time)/dt), Step, dt, Time, ZERO, ZERO
+
+
+if (Time >= Final_Time) STOP
+
+!------
+! Start the Runge Kutta Time Stepping
+!------
+
+CPU_Start = TIMER
+
+100  continue
+
+  CPU_Begin = TIMER
+
+  !call PS_Euler_Time_Step (x, Q, Gamma, CFL, dt) ; dt_Original = dt
+
+  Step = Step + 1 ; Time = Time + dt 
+
+  !call Stability_Check
+
+  Save_Indicator = .FALSE.
+  if (Time >= Next_Save_Time) then 
+                dt = dt - (Time-Next_Save_Time)
+              Time = Next_Save_Time
+
+    Save_Indicator = .TRUE.  
+    Next_Save_Time = Next_Save_Time + Movie_Resolution
+  endif
+
+  if (Time >  Final_Time) then
+     dt_Original = dt ; dt = dt - (Time-Final_Time) ; Time = Final_Time 
+  endif
+
+  call Runge_Kutta(Xpart, Upart, Npart, Ufluid, Tfluid, dpdxfluid)
+!stop
+
+
+!WRITE(6,*) Xpart(1), Upart(1)
+!WRITE(6,*) 'stop here'
+!STOP
+
+  if (Save_Indicator) then
+    !call Write_Restart_File (Step, Time, dt, dt_Original)
+
+    write (6,*) '*'
+ write(6,*) Time
+    call Riemann_Solution ; call TecPlot (1, Step, Time) 
+    write (6,*) '*'
+  endif   
+
+  CPU_End   = TIMER
+
+!  write (6,1001) INT((Final_Time-Time)/dt), Step, dt, Time, &
+!                 CPU_End-CPU_Begin, CPU_End-CPU_Start
+
+if (Time <  Final_Time) goto 100
+
+write (6,*) '*'
+call Riemann_Solution ; call TecPlot (1, Step, Time) 
+write (6,*) '*'
+
+!call Write_Restart_File (Step, Final_Time, dt, dt_Original)
+
+DEALLOCATE(Source1)
+
+write (6,*) RING, RING, RING, RING
+
+1000 format (1x,' Total_Step    Step         dt        Time        CPU Time'/ &
+             1x,60('-'))
+1001 format (   1x,'  ',i7,1x,i7,3x,4E13.4)
+ 197 format (3(1x,g20.14),1x,i8)
+
+CONTAINS
+!
+! ==================================================================
+!
+Subroutine Input (Unit)
+
+  integer , OPTIONAL :: Unit
+  integer            :: LID, IOS
+
+  if (PRESENT(Unit)) then ; LID=Unit ; else ; LID = 7  ; endif
+
+  OPEN (UNIT=LID, FILE='Input/WENO.input', STATUS='OLD', IOSTAT=IOS)
+
+  read (LID,*) N_x 
+
+  read (LID,'(//)')
+  read (LID,*) x0
+  read (LID,*) x1
+
+  read (LID,'(//)')
+  read (LID,*) WENO_Order, WENO_Weight, WENO_Epsilon, WENO_Power
+  read (LID,*) WENO_Lambda, WENO_Sound_Speed, WENO_Unroll_Loop        
+
+  read (LID,'(//)')
+  read (LID,*) Restart
+  read (LID,*)
+  read (LID,*) Begin_Time
+  read (LID,*) Final_Time
+  read (LID,*) CFL
+  read (LID,*)
+  read (LID,*) Movie_Resolution
+
+  read (LID,'(//)')
+  read (LID,*) Shock_Type
+  read (LID,*) Gamma
+  read (LID,*) Mach
+  read (LID,*) P_Ratio
+
+  read (LID,*)
+  read (LID,*) Shock_Profile
+  read (LID,*) Shock_Location
+  read (LID,*) Amplitude
+  read (LID,*) Wave_Number
+
+  CLOSE (LID)
+
+End Subroutine Input
+!
+! ==================================================================
+!
+Subroutine Domain_Setup
+
+   NV = Dimensions+2 
+
+END Subroutine Domain_Setup
+!
+!==========================================================================
+!
+Subroutine Allocate_Variables
+
+  ALLOCATE (x(N0:N5), Q(N0:N5,NV), Q0(N0:N5,NV))
+  ALLOCATE (Riemann(N0:N5,NV), Shock_Case(N0:N5))
+  ALLOCATE (Lambda(NV), V_Moving_Frame(Dimensions))
+
+  V_Moving_Frame = ZERO
+
+END Subroutine Allocate_Variables
+!
+!==========================================================================
+!
+Subroutine DeAllocate_Variables
+
+  DEALLOCATE (x, Q, Q0, Riemann, Shock_Case)
+  DEALLOCATE (Lambda, V_Moving_Frame)
+
+END Subroutine DeAllocate_Variables
+!
+! ==================================================================
+!
+Subroutine Initial_Condition 
+
+   write(*,*) 'Shock_Profile', Shock_Profile, Shock_Location
+  call PS_Shock_Profile_Setup (Shock_Profile, Shock_Location,        &
+                               Q_Left, Q_Right,                      &
+                               Gamma, Wave_Number, Amplitude, x, Q)
+
+write(*,*) Q_left(:)
+write(*,*) Q_right(:)
+  Q0 = Q
+
+End Subroutine Initial_Condition 
+!
+! ==================================================================
+!
+Subroutine Stability_Check
+
+  if (dt >  EPSILON(ONE)) RETURN
+
+  write (6,*) '================  STOP ! Unstable  ====================='
+  write (6,*)
+  write (6,1001) INT((Final_Time-Time)/dt), Step, dt, Time, &
+                 CPU_End-CPU_Begin, CPU_End
+  write (6,*) RING, RING
+
+  call Riemann_Solution ; call TecPlot (1, Step, Time,0) ; STOP
+
+1001 format (   1x,'  ',i7,1x,i7,3x,4E13.4/)
+
+End Subroutine Stability_Check
+!
+!==========================================================================
+!
+Subroutine Index_Setup
+
+  call PS_WENO_Domain_Index     (Method, Symmetry, WENO_Order, N_x, &
+                                 N, N0, N1, N2, N3, N4, N5)
+
+END Subroutine Index_Setup 
+!
+!==========================================================================
+!
+Subroutine Operator_Setup
+
+  call PS_WENO_Option_Setup (Order           = WENO_Order,             &
+                             Epsilon         = WENO_Epsilon,           &
+                             Power           = WENO_Power,             &
+                             Lambda_Factor   = WENO_Lambda,            &
+                             Sound_Speed_Min = WENO_Sound_Speed,       &
+                             Weight_Type     = WENO_Weight,            &
+                             Unroll_Loop     = WENO_Unroll_Loop        )
+
+  call PS_WENO_Uniform_Grid (N0, N2, N3, N5, x0, x1, dx, x)
+
+END Subroutine Operator_Setup 
+!
+!==========================================================================
+!
+Subroutine Runge_Kutta(Xpart, Upart, Npart, Ufluid, Tfluid,dpdxfluid)
+
+  implicit none 
+
+  integer  :: Runge_Kutta_Stage
+  integer  :: i,j
+  REALTYPE :: Time_n, Time_Now
+
+  REALTYPE, dimension(N0:N5,NV) :: Q1, D_Flux, Source
+  !REALTYPE, dimension(N0:N5,NV) :: Q1, D_Flux
+
+  INTEGER                         :: Npart
+  REALTYPE, dimension(Npart)      :: Xpart,Upart, Ufluid, Tfluid
+  REALTYPE, dimension(Npart)      :: f1,f2,dpdxfluid
+  REALTYPE, dimension(Npart)      :: Xpart1, Upart1, Tpart1
+
+  Time_n = Time-dt
+
+    Q1 = Q ; D_Flux = ZERO
+
+ ! Source = ZERO
+! Stage 1 :  
+ 
+  Runge_Kutta_Stage = 1 ; Time_Now = Time_n + dt
+
+   call Interpolate_Fluid_To_Particle_ENO(Xpart, Upart, Tpart, Npart, Q,  &
+                                      Ufluid, Tfluid, f1, f2,dpdxfluid)
+     !call Weigh_Particle_To_Grid(Xpart, Upart, Tpart, Npart, Ufluid,   &
+     !                           Tfluid, f1, f2, Source)
+     call Weigh_Particle_To_Grid_Fifth(Xpart, Upart, Tpart, Npart, Ufluid,   &
+                                Tfluid, f1, f2, Source)
+
+  call Fluxes          (Q , D_Flux)
+
+!  write(*,*) dpdxfluid(Npart)/RHOP,f1(Npart)*(Ufluid(Npart)-Upart(Npart))/TAUP0 
+
+    DO np=1,Npart
+      Xpart1(np) = Xpart(np) + dt*Upart(np)
+      Upart1(np) = Upart(np) + dt*(f1(np)*(Ufluid(np)-Upart(np))/TAUP0) 
+      !Upart1(np) = Upart(np) + dt*(f1(np)*(Ufluid(np)-Upart(np))/TAUP0 - dpdxfluid(np)/RHOP) 
+      Tpart1(np) = Tpart(np) + dt*f2(np)*(Tfluid(np)-Tpart(np))/TAUP0
+    ENDDO
+    if (update_particle == 0) Source = 0.0
+    Q1     = Q     + dt*(D_Flux + Source)
+
+!write(*,*) Q(1,1), (Q(1,3)-0.5*Q(1,2)**2/Q(1,1))*0.4, Q(1,2)
+!stop
+
+
+!  write(*,*) NV, Q(1,:)
+!  stop 
+  call Boundary_Condition (Q1)
+
+! Stage 2 :  
+ 
+  Runge_Kutta_Stage = 2 ; Time_Now = Time_n + dt/2
+
+   call Interpolate_Fluid_To_Particle_ENO(Xpart1, Upart1, Tpart1,  Npart, Q, & 
+                                      Ufluid, Tfluid, f1, f2,dpdxfluid)
+     !call Weigh_Particle_To_Grid(Xpart1, Upart1, Tpart1,  Npart, Ufluid,  &
+     !                           Tfluid, f1, f2, Source)
+     call Weigh_Particle_To_Grid_Fifth(Xpart1, Upart1, Tpart1,  Npart, Ufluid,  &
+                                Tfluid, f1, f2, Source)
+
+  call Fluxes             (Q1, D_Flux)
+
+    DO np=1,Npart
+      Xpart1(np) = (THREE*Xpart(np) + Xpart1(np) + dt*Upart1(np))/FOUR
+      Upart1(np) = (THREE*Upart(np) + Upart1(np) + dt*(f1(np)*(Ufluid(np)-Upart1(np))/TAUP0 -  &
+                    dpdxfluid(np)/RHOP) )/FOUR
+  !if (np==1) write(*,*) f1(np)*(Ufluid(np)-Upart1(np))/TAUP0
+      Tpart1(np) = (THREE*Tpart(np) + Tpart1(np) + dt*f2(np)*(Tfluid(np)-Tpart1(np))/TAUP0)/FOUR
+    ENDDO
+    if (update_particle == 0) Source = 0.0
+    Q1     = (THREE*Q + Q1 + dt*(D_Flux + Source))/FOUR
+
+  call Boundary_Condition (Q1)
+   
+! Stage 3:--
+
+  Runge_Kutta_Stage = 3 ; Time_Now = Time_n + dt  
+
+   call Interpolate_Fluid_To_Particle_ENO(Xpart1, Upart1, Tpart1, Npart, Q,  &
+                                      Ufluid, Tfluid, f1, f2,dpdxfluid)
+     call Weigh_Particle_To_Grid_Fifth(Xpart1, Upart1, Tpart1,  Npart, Ufluid,  &
+                                Tfluid, f1, f2, Source)
+     !call Weigh_Particle_To_Grid(Xpart1, Upart1, Tpart1,  Npart, Ufluid,  &
+     !                           Tfluid, f1, f2, Source)
+
+  call Fluxes             (Q1, D_Flux)
+
+    DO np=1,Npart
+      Xpart(np) = (Xpart(np) + TWO*Xpart1(np) + TWO*dt*Upart1(np))/THREE
+      Upart(np) = (Upart(np) + TWO*Upart1(np) + TWO*dt*(f1(np)*(Ufluid(np)-  &
+                   Upart1(np))/TAUP0 - dpdxfluid(np)/RHOP) )/THREE
+      Tpart(np) = (Tpart(np) + TWO*Tpart1(np) + TWO*dt*f2(np)*(Tfluid(np)-  &
+                   Tpart1(np))/TAUP0)/THREE
+    ENDDO
+    if (update_particle == 0) Source = 0.0
+
+
+    Q      = (Q   + TWO*Q1 + TWO*dt*(D_Flux + Source))/THREE
+
+  call Boundary_Condition (Q )
+
+  Source1(:,2:3) = Source(:,2:3)
+  
+!if (Time > 0.1) stop
+!write(*,*) 'stop here'
+!stop
+
+END Subroutine Runge_Kutta
+!
+!==========================================================================
+!
+Subroutine Fluxes (Q, D_Flux, Stage)
+
+  REALTYPE, dimension(N0:N5,NV) :: Q, D_Flux
+
+  integer , OPTIONAL :: Stage
+
+  call  PS_WENO_Euler_Flux (1, 1, Distributed_x, WENO_Order, dx,     &
+                            N0, N5, N2, N3,                          &
+                            Gamma, Q, D_Flux)
+
+  WHERE (ABS(D_Flux) <  1.0d-12) D_Flux = ZERO
+
+END Subroutine Fluxes
+!
+!==========================================================================
+!
+Subroutine Boundary_Condition (Q, Stage, Time)
+
+  REALTYPE, dimension(N0:N5,NV) :: Q
+
+  integer ,            OPTIONAL :: Stage
+  REALTYPE,            OPTIONAL :: Time
+
+  integer                       :: n, L
+
+  SELECT CASE (Shock_Type)
+    CASE DEFAULT
+      do n = 1, NV
+        Q(N0:N1,n) = Q_Left (n)
+        Q(N4:N5,n) = Q_Right(n)
+      enddo
+
+    CASE (5)
+      L = N1-N0
+
+      Q(N0:N1,1) =  Q(N2+L:N2:-1,1)
+      Q(N0:N1,2) = -Q(N2+L:N2:-1,2)
+      Q(N0:N1,3) =  Q(N2+L:N2:-1,3)
+
+      L = N5-N4
+
+      Q(N4:N5,1) =  Q(N3:N3-L:-1,1)
+      Q(N4:N5,2) = -Q(N3:N3-L:-1,2)
+      Q(N4:N5,3) =  Q(N3:N3-L:-1,3)
+
+    CASE (6)
+      do n = 1, NV
+        Q(N0:N1,n) = Q0(N0:N1,n)
+        Q(N4:N5,n) = Q0(N4:N5,n)
+      enddo
+
+  END SELECT
+  
+END Subroutine Boundary_Condition
+!
+! ==================================================================
+!
+Subroutine Riemann_Solution 
+
+  integer                  :: NN
+  REALTYPE                 :: x_s, Time_Now
+  REALTYPE, dimension(3)   :: Riemann_s
+
+  Time_Now = Time ; if (Time == ZERO) Time_Now = EPSILON(ONE)
+
+  SELECT CASE (Shock_Type)
+    CASE DEFAULT
+      do i = LBOUND(x,DIM=1),UBOUND(x,DIM=1)
+        x_s = (x(i)-Shock_Location)/Time_Now
+
+        call PS_Riemann_Solver (x_s, Q_Left, Q_Right, Riemann(i,:), &
+                                             Shock_Case=Shock_Case(i))
+      enddo
+
+     CASE (5)
+       Riemann = Q
+
+     CASE (999)
+       do i = LBOUND(x,DIM=1),UBOUND(x,DIM=1)
+         x_s = (x(i)-0.10d0)/Time_Now ; NN = N/2+1 
+
+         call PS_Riemann_Solver (x_s, Q_Left, Q0(NN,:) , Riemann_s, &
+                                             Shock_Case=Shock_Case(i))
+
+         x_s = (x(i)-0.90d0)/Time_Now
+         call PS_Riemann_Solver (x_s, Q0(NN,:), Q_Right, Riemann(i,:), &
+                                             Shock_Case=Shock_Case(i))
+
+         Riemann(i,:) = Riemann(i,:) + Riemann_s
+       enddo
+
+  END SELECT
+
+End Subroutine Riemann_Solution
+!
+! ==================================================================
+!
+Subroutine TecPlot (Initialize, Step, Time, Output)
+
+  integer                    :: Initialize, k, M
+  integer                    :: Step
+  integer  , OPTIONAL        :: Output
+  integer                    :: Simple_Output
+  REALTYPE                   :: Time
+  REALTYPE, dimension(3)     :: PP, QQ 
+  REALTYPE, dimension(N0:N5,NV) :: Source
+
+  character(LEN=80) :: Filename, WENO_Code
+  character(LEN=80) :: F_Output
+  character(LEN=20) :: F_POSITION = 'REWIND' , F_STATUS = 'REPLACE'
+
+                            WENO_Code = 'JS'
+      if (WENO_Weight == 1) WENO_Code = 'HAP'
+      if (WENO_Weight == 2) WENO_Code = 'Zico'
+
+      Filename = 'Output/Euler_'//TRIM(WENO_Code)
+
+  Simple_Output = 0 ; if (PRESENT(Output)) Simple_Output = Output
+
+  SELECT CASE (Initialize)
+    CASE (0)
+      call PS_Make_Filename (Filename, '.dat', F_Output)
+
+      call PS_OPEN_File (8, F_Output, Form='FORMATTED',  &
+                            Position=F_POSITION, Status=F_STATUS)
+
+      if (Shock_Type <= 0) write (8,*) 'Title="Custome Shock Tube"'
+      if (Shock_Type == 1) write (8,*) 'Title="123 Problem"'
+      if (Shock_Type == 2) write (8,*) 'Title="Sod Problem"'
+      if (Shock_Type == 3) write (8,*) 'Title="Lax Problem"'
+      if (Shock_Type == 4) write (8,*) 'Title="LeBlanc Problem"'
+      if (Shock_Type == 5) write (8,*) 'Title="Interacting Blast Wave Problem"'
+      if (Shock_Type == 6) write (8,*) 'Title="Moving Shock Problem"'
+      if (Shock_Type == 7) write (8,*) 'Title="Fixed Shock Problem"'
+      if (Shock_Type == 8) write (8,*) 'Title="Moving Shock with P_Ratio"'
+
+      if (Simple_Output == 1) then
+        write (8,*) 'Variables = x, Rho,RU,E'
+      else
+        write (8,*) 'Variables = x, Rho,RU,E,U,P, Rho_R,RU_R,Source1,Source2,Source3'
+      endif
+      write (8,98) SIZE(Q,DIM=1), TRIM(WENO_Code),                             &
+                   WENO_Order , WENO_Weight     , WENO_Epsilon    , WENO_Power,&
+                   WENO_Lambda, WENO_Sound_Speed, WENO_Unroll_Loop
+
+! particle file
+      OPEN(unit=23,file="Output/particle.plt")
+      WRITE(23,*) 'TITLE="particledata"'
+      WRITE(23,*) 'Variables = time, xpart, upart, Tpart'
+
+    CASE (1)
+      write (8,99) Step, Time, SIZE(Q,DIM=1), Step, Time
+
+      if (Simple_Output == 1) then
+        do i = LBOUND(Q,DIM=1), UBOUND(Q,DIM=1)
+          write (8,100) x(i), Q(i,:)
+        enddo
+      else
+        do i = LBOUND(Q,DIM=1), UBOUND(Q,DIM=1)
+          call Conservative_To_Primitive (Gamma,       Q(i,:), PP)
+          call Conservative_To_Primitive (Gamma, Riemann(i,:), QQ)
+
+          write (8,100) x(i), Q(i,:), PP(2:3), Riemann(i,1:2), Source1(i,1:3)
+          !  write (8,100) x(i), Q(i,:), PP(2:3), Riemann(i,:), QQ(2:3)
+        enddo
+      endif
+
+    ! write particle file
+    WRITE(23,101) Step, Npart
+    !WRITE(23,101) Step, 2
+    DO np=1,Npart
+      WRITE(23,100)  Time, Xpart(np), Upart(np), Tpart(np)
+      !WRITE(23,*) Time, Xpart(1), Upart(1), Tpart(1)
+      !WRITE(23,*) Time, Xpart(Npart), Upart(Npart), Tpart(Npart)
+     ENDDO
+
+  END SELECT
+
+   98  format (1x,'DATASETAUXDATA N           = "',i5     ,'"'    /   &
+               1x,'DATASETAUXDATA Algorithm   = "WENO"     '      /   &
+               1x,'DATASETAUXDATA Scheme      = "',a      ,'"'    /   &
+               1x,'DATASETAUXDATA Order       = "',i5     ,'"'    /   &
+               1x,'DATASETAUXDATA Method      = "',i5     ,'"'    /   &
+               1x,'DATASETAUXDATA Epsilon     = "',EN14.4 ,'"'    /   &
+               1x,'DATASETAUXDATA Power       = "',EN14.4 ,'"'    /   &
+               1x,'DATASETAUXDATA Lambda      = "',EN14.4 ,'"'    /   &
+               1x,'DATASETAUXDATA Sound_Speed = "',EN14.4 ,'"'    /   &
+               1x,'DATASETAUXDATA Unroll_Loop = "',i5     ,'"'        )
+   99  format (1x,'Zone T="WENO      ', i5, EN14.4,'" I=',i8      /   &
+               1x,'AUXDATA Scheme      = "WENO"     '             /   &
+               1x,'AUXDATA Step        = "',i5     ,'"'           /   &
+               1x,'AUXDATA Time        = "',EN14.4 ,'"'               )
+  100  format (1x,f10.4,1x,10(1x,e20.14,:))
+  101  format (1x,'Zone T="      ', i5, '" I=',i8      )
+
+
+
+
+End Subroutine TecPlot 
+!
+!===================================================================
+!
+Subroutine Write_Restart_File (Step, Time, dt, dt_Original)
+
+  integer           :: Step
+  REALTYPE          :: Time, dt, dt_Original
+
+  character(LEN=80) :: Filename, WENO_Code
+  character(LEN=80) :: F_Restart
+  character(LEN=20) :: F_POSITION = 'REWIND' , F_STATUS = 'REPLACE'
+  
+                            WENO_Code = 'JS'
+      if (WENO_Weight == 1) WENO_Code = 'HAP'
+      if (WENO_Weight == 2) WENO_Code = 'Zico'
+               
+      Filename = 'Restart/Restart_'//TRIM(WENO_Code)             
+               
+  call PS_Make_Filename (Filename, '.dat', F_Restart, Step)
+
+  call PS_OPEN_File (81, F_Restart, FORM='UNFORMATTED',  &
+                         POSITION=F_POSITION, STATUS=F_STATUS)
+
+  write (81) Step, Time, dt, dt_Original
+  write (81) N_x, CFL
+  write (81) Q
+
+  CLOSE (81)
+
+  call PS_Make_Filename ('Restart/Restart', '_N.dat', F_Restart, Step)
+
+  call PS_OPEN_File (82, F_Restart, FORM='FORMATTED',  &
+                         POSITION=F_POSITION, STATUS=F_STATUS)
+
+  write (82,101) Step, Time, dt, dt_Original
+  write (82,100) N_x
+
+  CLOSE (82)
+
+ 100 format (i10)
+ 101 format (1x,i10,3(1x,g20.14))
+
+End Subroutine Write_Restart_File
+!
+! ==================================================================
+!
+Subroutine  Read_Restart_File 
+
+  integer  :: M_x
+
+  character(LEN=80) :: Filename, WENO_Code
+  character(LEN=80) :: F_Restart
+  character(LEN=20) :: F_POSITION = 'REWIND' , F_STATUS = 'OLD'
+  
+                            WENO_Code = 'JS'
+      if (WENO_Weight == 1) WENO_Code = 'HAP'
+      if (WENO_Weight == 2) WENO_Code = 'Zico'
+               
+      Filename = 'Restart/Restart_'//TRIM(WENO_Code)             
+               
+  call PS_Make_Filename (Filename, '.dat', F_Restart, Restart)
+
+  call PS_OPEN_File (81, F_Restart, FORM='UNFORMATTED',  &
+                         POSITION=F_POSITION, STATUS=F_STATUS)
+
+  read  (81) Step, Time, dt, dt_Original
+
+  write (lid6,*) 
+  write (lid6,*) 'Restart from Step : ', Step
+  write (lid6,*) '             Time : ', Time
+  write (lid6,*) '               dt : ', dt_Original
+  write (lid6,*) 
+
+  read  (81) M_x, CFL
+
+  if (M_x /= N_x) then
+    write (lid6,*) 'STOP!  Mismatched grid dimension in Read_Restart_File'
+    write (lid6,*) '       Requested N_x = ', N_x
+    write (lid6,*) '       Stored    M_x = ', M_x
+    STOP
+  endif
+
+  read  (81) Q
+
+  CLOSE (81)
+
+End Subroutine Read_Restart_File
+!
+! ==================================================================
+!
+
+Subroutine Weigh_Particle_To_Grid (Xpart, Upart, Tpart, Npart, Ufluid, Tfluid, f1, f2, Source)
+
+  INTEGER                         :: Npart
+  REALTYPE, dimension(Npart)      :: Xpart, Upart, Tpart
+  REALTYPE, dimension(Npart)      :: Ufluid, Tfluid, f1, f2
+  REALTYPE, dimension(N0:N5,NV)   :: Source
+  REALTYPE                        :: domain_length,dist1,dist2, weight,weight1,  xfirst
+  INTEGER                         :: npart_loc, np
+
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+
+  Source         = 0.0
+  DO np = 1, Npart
+    npart_loc             = INT((Xpart(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+    dist1                 = (Xpart(np)-x(npart_loc))/dx
+    dist2                 = 1.0-dist1
+    weight                = PM0*f1(np)*(Ufluid(np)-Upart(np))/TAUP0
+    Source1(npart_loc,1)   = Source1(npart_loc,2)   + PM0*dist2
+    Source1(npart_loc+1,1) = Source1(npart_loc+1,2) + PM0*dist1
+    Source(npart_loc,2)   = Source(npart_loc,2)   + weight*dist2
+    Source(npart_loc+1,2) = Source(npart_loc+1,2) + weight*dist1
+    weight                = weight*Upart(np)
+    weight1               = PM0*f2(np)*(Tfluid(np)-Tpart(np))/TAUP0/(gamma-1.0)
+    Source(npart_loc,3)   = Source(npart_loc,3)   + weight*dist2 + weight1*dist2
+    Source(npart_loc+1,3) = Source(npart_loc+1,3)  + weight*dist1 + weight1*dist1
+  ENDDO
+
+  Source = -Source*Source_factor/dx
+  Source1  =  Source1*Source_factor/dx
+!stop
+!
+END Subroutine Weigh_Particle_To_Grid
+
+!
+! ==================================================================
+!
+Subroutine Weigh_Particle_To_Grid_Fifth (Xpart_l, Upart_l, Tpart_l, Npart_l,    &
+                           Ufluid_l, Tfluid_l, f1_l, f2_l, Source_l)
+
+  INTEGER                         :: Npart_l
+  REALTYPE, dimension(Npart)      :: Xpart_l, Upart_l, Tpart_l
+  REALTYPE, dimension(Npart)      :: Ufluid_l, Tfluid_l, f1_l, f2_l
+  REALTYPE, dimension(N0:N5,NV)   :: Source_l
+  REALTYPE                        :: domain_length,weight,weight1,  xfirst
+  INTEGER                         :: npart_loc, np
+  REALTYPE                        :: dist1,dist2,dist3,dist4,dist5,dist6
+  REALTYPE                        :: W1,W2,W3,W4,W5,W6
+  REALTYPE                        :: coeff1, coeff2,coeff3, dum
+!
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+!
+  coeff1 = dx/(120.0d0*dx) 
+  coeff2 = -6.0*dx*dum
+  coeff3 = 3.0*dum
+
+! third order weighing
+  Source1              = 0.0d0
+  Source_l(:,:)        = 0.0d0
+!
+  DO np = 1, Npart_l
+    npart_loc               = INT((Xpart_l(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+!
+    dist1                   = Xpart(np)-x(npart_loc)
+    dist2                   = dx - dist1 
+    dist3                   = dist1 + dx
+    dist4                   = dist1 + 2*dx
+    dist5                   = dist2 + dx
+    dist6                   = dist2 + 2*dx
+!
+    W1                      = coeff1*(3.0d0 - dist4/dx)**5
+    W2                      = coeff1*(51.0 + 75.0*dist3/dx - 210.0*(dist3/dx)**2 + 150.0*(dist3/dx)**3  & 
+  &                              - 45.0*(dist3/dx)**4 + 5.0*(dist3/dx)**5)
+    W3                      = 2.0*coeff1*(33.0 - 30.0*(dist1/dx)**2 + 15.0*(dist1/dx)**4 - 5.0*(dist1/dx)**5)
+    W4                      = 2.0*coeff1*(33.0 - 30.0*(dist2/dx)**2 + 15.0*(dist2/dx)**4 - 5.0*(dist2/dx)**5)
+    W5                      = coeff1*(51.0 + 75.0*dist5/dx - 210.0*(dist5/dx)**2 + 150.0*(dist5/dx)**3  & 
+  &                              - 45.0*(dist5/dx)**4 + 5.0*(dist5/dx)**5)
+    W6                      = coeff1*(3.0d0 - dist6/dx)**5
+!
+    Source1(npart_loc-2,1)  = Source1(npart_loc-2,1)  + W1
+    Source1(npart_loc-1,1)  = Source1(npart_loc-1,1)  + W2
+    Source1(npart_loc,  1)  = Source1(npart_loc,1)    + W3
+    Source1(npart_loc+1,1)  = Source1(npart_loc+1,1)  + W4
+    Source1(npart_loc+2,1)  = Source1(npart_loc+2,1)  + W5
+    Source1(npart_loc+3,1)  = Source1(npart_loc+3,1)  + W6
+!
+    weight                  = PM0*f1(np)*(Ufluid(np)-Upart(np))/TAUP0
+    Source_l(npart_loc-2,2) = Source_l(npart_loc-2,2) + weight*W1
+    Source_l(npart_loc-1,2) = Source_l(npart_loc-1,2) + weight*W2
+    Source_l(npart_loc,  2) = Source_l(npart_loc,  2) + weight*W3
+    Source_l(npart_loc+1,2) = Source_l(npart_loc+1,2) + weight*W4
+    Source_l(npart_loc+2,2) = Source_l(npart_loc+2,2) + weight*W5
+    Source_l(npart_loc+3,2) = Source_l(npart_loc+3,2) + weight*W6
+!
+    weight                  = weight*Upart(np)
+    weight1                 = PM0*f2(np)*(Tfluid(np)-Tpart(np))/TAUP0/(gamma-1.0)
+    Source_l(npart_loc-2,3) = Source_l(npart_loc-2,3) + weight*W1 + weight1*W1
+    Source_l(npart_loc-1,3) = Source_l(npart_loc-1,3) + weight*W2 + weight1*W2
+    Source_l(npart_loc,  3) = Source_l(npart_loc,  3) + weight*W3 + weight1*W3
+    Source_l(npart_loc+1,3) = Source_l(npart_loc+1,3) + weight*W4 + weight1*W4
+    Source_l(npart_loc+2,3) = Source_l(npart_loc+2,3) + weight*W5 + weight1*W5
+    Source_l(npart_loc+3,3) = Source_l(npart_loc+3,3) + weight*W6 + weight1*W6
+!
+  ENDDO
+!
+  Source_l = -Source_l*Source_factor/dx
+  Source1  =  Source1*Source_factor/dx
+!
+END Subroutine Weigh_Particle_To_Grid_Fifth
+
+
+!
+! ==================================================================
+!
+Subroutine Weigh_Particle_To_Grid_Third (Xpart, Upart, Tpart, Npart, Ufluid, Tfluid, f1, f2, Source)
+
+  INTEGER                         :: Npart
+  REALTYPE, dimension(Npart)      :: Xpart, Upart, Tpart
+  REALTYPE, dimension(Npart)      :: Ufluid, Tfluid, f1, f2
+  REALTYPE, dimension(N0:N5,NV)   :: Source
+  REALTYPE                        :: domain_length,weight,weight1,  xfirst
+  INTEGER                         :: npart_loc, np
+  REALTYPE                        :: dist1,dist2,dist3,dist4
+  REALTYPE                        :: W1,W2,W3,W4
+  REALTYPE                        :: coeff1, coeff2,coeff3, dum
+!
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+!
+  dum    = (dx)/(6.0*dx**4)
+  coeff1 = 4.0*dx**3*dum
+  coeff2 = -6.0*dx*dum
+  coeff3 = 3.0*dum
+
+! third order weighing
+  Source         = 0.0
+  DO np = 1, Npart
+!
+    npart_loc             = INT((Xpart(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+!
+    dist1                 = Xpart(np)-x(npart_loc)
+    dist2                 = dx - dist1 
+    dist3                 = dist1 + dx
+    dist4                 = dist2 + dx
+!
+    W1                    = dum*(2*dx-dist3)**3
+    W2                    = coeff1 + coeff2*dist1**2 + coeff3*dist1**3
+    W3                    = coeff1 + coeff2*dist2**2 + coeff3*dist2**3
+    W4                    = dum*(2*dx-dist4)**3
+!
+    !Source1(npart_loc-1,1) = Source1(npart_loc-1,1) + PM0*W1
+    !Source1(npart_loc,  1) = Source1(npart_loc,1)   + PM0*W2
+    !Source1(npart_loc+1,1) = Source1(npart_loc+1,1) + PM0*W3
+    !Source1(npart_loc+2,1) = Source1(npart_loc+2,1) + PM0*W4
+!
+    weight                = PM0*f1(np)*(Ufluid(np)-Upart(np))/TAUP0
+    Source(npart_loc-1,2) = Source(npart_loc-1,2)   + weight*W1
+    Source(npart_loc  ,2) = Source(npart_loc,2)     + weight*W2
+    Source(npart_loc+1,2) = Source(npart_loc+1,2)   + weight*W3
+    Source(npart_loc+2,2) = Source(npart_loc+2,2)   + weight*W4
+!
+    weight                = weight*Upart(np)
+    weight1               = PM0*f2(np)*(Tfluid(np)-Tpart(np))/TAUP0/(gamma-1.0)
+    Source(npart_loc-1,3) = Source(npart_loc-1,3)   + weight*W1 + weight1*W1
+    Source(npart_loc  ,3) = Source(npart_loc,3)     + weight*W2 + weight1*W2
+    Source(npart_loc+1,3) = Source(npart_loc+1,3)   + weight*W3 + weight1*W3
+    Source(npart_loc+2,3) = Source(npart_loc+2,3)   + weight*W4 + weight1*W4
+!
+  ENDDO
+
+! write(*,*) Source(:,3)/dx
+!stop
+
+  Source = -Source*Source_factor/dx
+  !Source = 0.0
+
+ !stop
+
+!
+END Subroutine Weigh_Particle_To_Grid_Third
+
+!
+! ==================================================================
+!
+
+Subroutine Interpolate_Fluid_To_Particle(Xpart, Upart, Tpart,  Npart, Q, Ufluid, Tfluid, f1, f2,dpdxfluid) 
+
+  INTEGER                         :: Npart
+  INTEGER                         :: np, npart_loc
+  REALTYPE, dimension(Npart)      :: Xpart, Upart, Tpart
+  REALTYPE, dimension(Npart)      :: Ufluid, Tfluid, f1, f2, dpdxfluid
+  REALTYPE, dimension(N0:N5,NV)   :: Q
+  REALTYPE                        :: rep
+  REALTYPE                        :: domain_length
+  REALTYPE                        :: xa, xb, ua, ub, Ta, Tb,  rhoa, rhob, xfirst, pa, pb
+  REALTYPE                        :: map,cd, f1temp, rhofluid
+ 
+
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+  DO np = 1, Npart
+    npart_loc          = INT((Xpart(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+    xa                 = x(npart_loc)
+    xb                 = x(npart_loc+1)
+    rhoa               = Q(npart_loc,1)
+    rhob               = Q(npart_loc+1,1)
+    ua                 = Q(npart_loc,2)/rhoa
+    ub                 = Q(npart_loc+1,2)/rhob
+    Ta                 = (Q(npart_loc,3)/rhoa-ua**2/2.0)*(gamma-1.0)*gamma
+    Tb                 = (Q(npart_loc+1,3)/rhob-ub**2/2.0)*(gamma-1.0)*gamma
+    pa                 = rhoa*Ta/gamma
+    pb                 = rhob*Tb/gamma
+    Ufluid(np)         = ua + (ub-ua)/(xb-xa)*(Xpart(np)-xa)
+    Tfluid(np)         = Ta + (Tb-Ta)/(xb-xa)*(Xpart(np)-xa)
+    rhofluid           = rhoa + (rhob-rhoa)/(xb-xa)*(Xpart(np)-xa)
+    dpdxfluid(np)      = (pb - pa)/dx
+    !if (abs(dpdxfluid(np)) > 5.0) dpdxfluid(np) = 0.0
+    rep                = rhofluid*CRE*sqrt((Ufluid(np)-Upart(np))**2)
+    map                = sqrt((Ufluid(np)-Upart(np))**2)/sqrt(Tfluid(np))
+    !f1(np)             = (1.+.15*rep**(.687))/(1.)
+    f1temp             = (1.+.15*rep**(.687))/(1.)
+    cd                 = ( 24.0 + 0.38*rep + 4.0*sqrt(rep))*(1.0+exp(-0.43/(map**4.67)))
+    f1(np)             = 3.0*cd/(4.0*18.0)
+    f1(np)             = 1.0d0
+
+!if (np==1) write(*,*) f1temp, f1(np), map, rep
+    f2(np)             = CF2*(2.+.6*sqrt(rep)*pr**(.33))/(1.)
+    f2(np)             = 1.0d0
+    !if (rep> 20000) WRITE(6,*) 'Re_p is too large, change setup', rep
+  ENDDO
+
+END Subroutine Interpolate_Fluid_To_Particle
+!
+! ==================================================================
+!
+
+Subroutine Interpolate_Fluid_To_Particle_ENO(Xpart, Upart, Tpart,  Npart, Q, Ufluid, Tfluid, f1, f2,dpdxfluid) 
+
+  INTEGER, PARAMETER              :: norder  = 5
+  INTEGER                         :: Npart
+  INTEGER                         :: np, npart_loc, nloc1,p1,i,n,is,m,k
+  INTEGER, DIMENSION(N0:N5)       :: left
+  REALTYPE, dimension(Npart)      :: Xpart, Upart, Tpart
+  REALTYPE, dimension(Npart)      :: Ufluid, Tfluid, f1, f2, dpdxfluid
+  REALTYPE, dimension(N0:N5,NV)   :: Q
+  REALTYPE, dimension(N0:N5,norder+1):: c1
+  REALTYPE, dimension(norder+1)     :: c,x1
+  REALTYPE, dimension(N0:N5)      :: dpdx,p
+  REALTYPE                        :: rep
+  REALTYPE                        :: domain_length
+  REALTYPE                        :: xa, xb, ua, ub, Ta, Tb,  rhoa, rhob, xfirst, pa, pb
+  REALTYPE                        :: map,cd, f1temp, rhofluid, dist1, som
+  REALTYPE                        :: hx(norder), cx(norder),Qpart(norder)
+
+!
+! Determine divided differences
+  DO i=N0+norder,N5-norder  
+     x1(:) = x(i:i+norder)
+     c(:)  = Q(i:i+norder,2)
+     DO p1=1,norder-1
+         DO k=norder,p1+1,-1
+            c(k) = (c(k)-c(k-1))/(x1(k)-x1(k-p1)) 
+         ENDDO
+     c1(i,p1) = c(k)
+     ENDDO
+  ENDDO
+
+!
+! determine left most interpolating point with ENO approach
+  DO i=N0+norder,N5
+    is = i
+    DO m=2,norder-1
+      IF (abs(c1(is-1,m)) < abs(c1(is,m)))  THEN
+          is = is -1;
+      ENDIF
+    ENDDO
+    left(i) = is;
+  ENDDO
+
+  DO n=1,norder
+    cx(n) = (n-1)*dx 
+  ENDDO
+ 
+  DO n=N0,N5
+    p(n)  =  (Q(n,3) - 0.5*Q(n,2)**2/Q(n,1))*(gamma-1.0)
+  ENDDO
+  
+  call PS_Diff_WENO (1, WENO_Order, N0, N5, N2, N3, dx, p, dpdx)
+  
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+  DO np = 1, Npart
+!
+    npart_loc          = INT((Xpart(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+    nloc1              = left(npart_loc)
+
+    dist1              = (Xpart(np)-x(npart_loc)) + (npart_loc-nloc1)*dx
+    
+    DO n=1,norder
+        CALL polyn1(n,dist1,norder,cx,hx(n))
+    ENDDO
+!
+    DO i = 1,3
+      som = 0.0
+      DO n=1,norder
+          som = som + Q(nloc1 + n - 1,i)*hx(n)
+      ENDDO
+      Qpart(i) = som
+    ENDDO
+    Ufluid(np)         = Qpart(2)/Qpart(1)
+    Tfluid(np)         = (Qpart(3)/Qpart(1)-Ufluid(np)**2/2.0)*(gamma-1.0)*gamma 
+    rhofluid           = Qpart(1)
+!
+    som = 0.0
+    DO n=1,norder
+        som = som + dpdx(nloc1 + n - 1)*hx(n)
+    ENDDO
+    dpdxfluid(np)      = som
+    !if (abs(dpdxfluid(np)) > 5.0) dpdxfluid(np) = 0.0
+
+    rep                = rhofluid*CRE*sqrt((Ufluid(np)-Upart(np))**2)
+    map                = sqrt((Ufluid(np)-Upart(np))**2)/sqrt(Tfluid(np))
+    !f1(np)             = (1.+.15*rep**(.687))/(1.)
+    f1temp             = (1.+.15*rep**(.687))/(1.)
+    cd                 = ( 24.0 + 0.38*rep + 4.0*sqrt(rep))*(1.0+exp(-0.43/(map**4.67)))
+    f1(np)             = 3.0*cd/(4.0*18.0)
+    f1(np)             = 1.0d0
+! if (np==1) write(*,*) f1temp, f1(np), map, rep
+    f2(np)             = CF2*(2.+.6*sqrt(rep)*pr**(.33))/(1.)
+    f2(np)             = 1.0d0
+    !if (rep> 20000) WRITE(6,*) 'Re_p is too large, change setup', rep
+  ENDDO
+
+END Subroutine Interpolate_Fluid_To_Particle_ENO
+!
+! ==================================================================
+!
+
+Subroutine Interpolate_Fluid_To_Particle_High(Xpart, Upart, Tpart,  Npart, Q, Ufluid, Tfluid, f1, f2,dpdxfluid) 
+
+  INTEGER, PARAMETER              :: norder = 4
+  INTEGER                         :: Npart
+  INTEGER                         :: np, npart_loc, nloc1
+  REALTYPE, dimension(Npart)      :: Xpart, Upart, Tpart
+  REALTYPE, dimension(Npart)      :: Ufluid, Tfluid, f1, f2, dpdxfluid
+  REALTYPE, dimension(N0:N5,NV)   :: Q
+  REALTYPE, dimension(N0:N5)      :: dpdx,p
+  REALTYPE                        :: rep
+  REALTYPE                        :: domain_length
+  REALTYPE                        :: xa, xb, ua, ub, Ta, Tb,  rhoa, rhob, xfirst, pa, pb
+  REALTYPE                        :: map,cd, f1temp, rhofluid, dist1, som
+  REALTYPE                        :: hx(norder), cx(norder),Qpart(norder)
+
+  DO n=1,norder
+    cx(n) = (n-1)*dx 
+  ENDDO
+ 
+  DO n=N0,N5
+    p(n)  =  (Q(n,3) - 0.5*Q(n,2)**2/Q(n,1))*(gamma-1.0)
+  ENDDO
+  
+  call PS_Diff_WENO (1, WENO_Order, N0, N5, N2, N3, dx, p, dpdx)
+  
+  domain_length =  x(N5) - x(N0)
+  xfirst        =  x(N0)
+  DO np = 1, Npart
+    npart_loc          = INT((Xpart(np)-xfirst)/domain_length*DBLE(N5-N0)) + N0 
+    dist1              = (Xpart(np)-x(npart_loc)) + INT((norder-1)/2)*dx
+    DO n=1,norder
+        CALL polyn1(n,dist1,norder,cx,hx(n))
+    ENDDO
+
+    nloc1 = npart_loc + INT((norder-1)/2) -1
+    DO nv = 1,3
+      som = 0.0
+      DO n=1,norder
+          som = som + Q(nloc1 + n,nv)*hx(n)
+      ENDDO
+      Qpart(nv) = som
+    ENDDO
+    Ufluid(np)         = Qpart(2)/Qpart(1)
+    Tfluid(np)         =(Qpart(3)/Qpart(1)-Ufluid(np)**2/2.0)*(gamma-1.0)*gamma 
+    rhofluid           = Qpart(1)
+
+    som = 0.0
+    DO n=1,norder
+        som = som + dpdx(nloc1 + n)*hx(n)
+    ENDDO
+    dpdxfluid(np)      = som
+    !if (abs(dpdxfluid(np)) > 5.0) dpdxfluid(np) = 0.0
+    rep                = rhofluid*CRE*sqrt((Ufluid(np)-Upart(np))**2)
+    map                = sqrt((Ufluid(np)-Upart(np))**2)/sqrt(Tfluid(np))
+    !f1(np)             = (1.+.15*rep**(.687))/(1.)
+    f1temp             = (1.+.15*rep**(.687))/(1.)
+    cd                 = ( 24.0 + 0.38*rep + 4.0*sqrt(rep))*(1.0+exp(-0.43/(map**4.67)))
+    f1(np)             = 3.0*cd/(4.0*18.0)
+    f1(np)             = 1.0d0
+! if (np==1) write(*,*) f1temp, f1(np), map, rep
+    f2(np)             = CF2*(2.+.6*sqrt(rep)*pr**(.33))/(1.)
+    f2(np)             = 1.0d0
+    !if (rep> 20000) WRITE(6,*) 'Re_p is too large, change setup', rep
+  ENDDO
+
+END Subroutine Interpolate_Fluid_To_Particle_High
+
+
+!
+! ==================================================================
+!
+      SUBROUTINE polyn1(k,x,n,z, polyn)
+!                                                                       
+!     date: 2/13/95                                                     
+!     routines called: none                                             
+!     includes: none                                                    
+!     applicability:all                                                 
+!                                                                       
+!     compute at x the lagrange polynomial k of degree n-1              
+!     whose zeros are given by the z(i)                                 
+!                                                                       
+!      implicit none
+      integer                :: n,k
+      DOUBLE PRECISION       :: x
+      DOUBLE PRECISION       :: polyn
+      DOUBLE PRECISION       :: z(n)
+!                                                                       
+      if(k.eq.1)     then
+         polyn = (x - z(2))/(z(k) - z(2))
+         do 100 j = 3,n
+            polyn = polyn*(x - z(j))/(z(k) - z(j))
+  100    continue
+      else
+         polyn = (x - z(1))/(z(k) - z(1))
+         do 200 j = 2,k-1
+            polyn = polyn*(x - z(j))/(z(k) - z(j))
+  200    continue
+         do 300 j = k+1,n
+            polyn = polyn*(x - z(j))/(z(k) - z(j))
+  300    continue
+      endif
+!                                                                       
+      return
+
+      END Subroutine polyn1
+
+!
+! ==================================================================
+!
+END Program SHOCK_TUBE_TEST_SUITE_WITh_WENO

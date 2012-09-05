@@ -1,0 +1,7 @@
+mkdir Executable
+mkdir Output
+mkdir Restart
+mkdir Object
+mkdir Listing
+mkdir Module
+cp Utility/clean Utility/code_remove Utility/code_setup .

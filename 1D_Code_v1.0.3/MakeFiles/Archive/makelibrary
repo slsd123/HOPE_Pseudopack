@@ -1,0 +1,237 @@
+.SILENT :
+.IGNORE :
+.SUFFIX : .f .F .f90 .F90 .a .c .o .mod .h
+
+#=========================================================================
+#  Machine Name :
+
+ SITE_ID           = Brown_CASCV
+ MACHINE_TYPE      = LINUX_CLUSTER
+ MACHINE_NAME      = dizzy
+ MACHINE_PROCESSOR = INTEL
+ MACHINE_OS        = LINUX
+ MACHINE_COMPILER  = INTEL
+
+ SITE_ID           = IMPA
+ MACHINE_TYPE      = LINUX_CLUSTER
+ MACHINE_NAME      = tempest
+ MACHINE_PROCESSOR = AMD_OPT64
+ MACHINE_OS        = LINUX
+ MACHINE_COMPILER  = PGI
+
+ SITE_ID           = Brown_DAM_SCG
+ MACHINE_TYPE      = SUN
+ MACHINE_NAME      = wsdon-opt
+ MACHINE_PROCESSOR = AMD_OPT64
+ MACHINE_OS        = LINUX
+ MACHINE_COMPILER  = PGI
+
+#=========================================================================
+#  Code Options
+
+ PARALLEL_OR_SERIAL = Serial
+#PARALLEL_OR_SERIAL = Parallel
+#PARALLEL_OR_SERIAL = OpenMP
+
+#USE_ESSL_LIBRARY   = on
+ USE_ESSL_LIBRARY   = off
+
+ OPTIMIZATION_LEVEL = 2
+
+ COMPILER_OPTION    = on
+ DEBUG              = off
+ PROFILE            = off
+ WARNING            = off
+
+ LOCAL_LIBRARY      = on
+  LOCAL_GEMM        = on
+  LOCAL_GAMMA       = on
+  LOCAL_GAUSS       = on
+  LOCAL_VFFT        = on
+
+ ADD_OPTION        +=
+
+#=========================================================================
+#
+  PS_Tar_Dir        = 
+  PS_Tar_Filename   = PseudoPack_2006_051806b
+
+#=========================================================================
+#
+ Silent_Make = -s
+
+MAKE        = gmake -f makelibrary $(Silent_Make)
+
+#=========================================================================
+#               ---- Fortran Compiler ----
+
+MACHINE_PATH = $(MACHINE_TYPE)/$(MACHINE_OS)/$(MACHINE_COMPILER)
+
+MAKE_DIR     = MakeFiles
+MAKE_PATH    = $(MAKE_DIR)/Compilers/$(MACHINE_PATH)
+
+include $(MAKE_DIR)/makeBase
+include $(MAKE_DIR)/makeSource
+include $(MAKE_DIR)/makeCompiler_Option
+include $(MAKE_PATH)/make$(MACHINE_COMPILER)
+include $(MAKE_PATH)/Compiler_Option
+
+#=========================================================================
+#               ---- PseudoPack library ----
+
+ PS_ROOT_DIR  = $(CURDIR)
+
+ PS_MAIN_PATH = ../PseudoPack_2006/
+ PS_VERSION   = dd
+
+ PS_LIB_NAME  = pseudopack
+ PS_MOD_NAME  = pseudopack
+
+ifneq ($(strip $(PS_VERSION)),)
+ PS_LIBRARY_NAME = $(strip $(PS_LIB_NAME))_$(strip $(PS_VERSION))
+ PS_MODULE_NAME  = $(strip $(PS_MOD_NAME))_$(strip $(PS_VERSION))
+else
+ PS_LIBRARY_NAME = $(strip $(PS_LIB_NAME))
+ PS_MODULE_NAME  = $(strip $(PS_MOD_NAME))
+endif
+
+PS_SRCDIR  = $(PS_MAIN_PATH)Source/
+PS_LIBDIR  = $(PS_MAIN_PATH)Library/$(MACHINE_PATH)/$(PARALLEL_OR_SERIAL)/
+PS_MODDIR  = $(subst Library,Module,$(PS_LIBDIR))
+PS_LSTDIR  = $(subst Library,Listing,$(PS_LIBDIR))
+PS_OBJDIR  = $(subst Library,Object,$(PS_LIBDIR))
+
+#=========================================================================
+#               ---- Search Path -----
+
+#MOD_PATH   = -module $(PS_MODDIR)
+SRC_PATH   = -I$(PS_SRCDIR)
+VPATH      = $(PS_SRCDIR) $(PS_MODDIR) $(PS_OBJDIR)
+
+#=========================================================================
+#               ---- CPP Pre-Processor ----
+
+ CPP_MACHINE      = $(MACHINE_TYPE)
+#CPP_PRECISION    = SINGLE_PRECISION
+ CPP_FOURIER      = DEFAULT_FOURIER
+
+ifeq ($(strip $(DEBUG)),on)
+ CPP_DEBUG        = DEBUG
+endif
+
+ CPP_FFT          = VFFT
+
+ifeq ($(strip $(MACHINE_TYPE)),CRAY)
+ CPP_FFT          = CRAY
+endif
+
+ifeq ($(strip $(MACHINE_TYPE)),IBM_SP)
+ ifeq ($(strip $(USE_ESSL_LIBRARY)),on)
+  CPP_FFT          = ESSL
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  CPP_PESSL        = PESSL
+ endif
+ endif
+endif
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  CPP_PESSL        = PESSL
+endif
+
+ifeq ($(strip $(LOCAL_LIBRARY)),on)
+
+ ifeq ($(strip $(LOCAL_GEMM)),on)
+  CPP_GEMM         = LOCAL_GEMM
+ endif
+
+ ifeq ($(strip $(LOCAL_GAMMA)),on)
+  CPP_GAMMA        = LOCAL_GAMMA
+ endif
+
+ ifeq ($(strip $(LOCAL_GAUSS)),on)
+  CPP_GAUSS        = LOCAL_GAUSS_QUADRATURE
+ endif
+
+  CPP_VFFT         = LOCAL_VFFT
+ ifeq ($(strip $(MACHINE_TYPE)),CRAY)
+  CPP_VFFT         = LOCAL_CRAY_FFT
+ endif
+
+endif
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),OpenMP)
+ CPP_OPENMP       = PARALLEL_OPENMP
+endif
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+ CPP_MPI          = PARALLEL_MPI
+endif
+
+ CPP_MAPPED_WENO  = MAPPED_WENO
+
+CPP_DEFINED = $(CPP_MACHINE) $(CPP_PRECISION)                     \
+	      $(CPP_FOURIER) $(CPP_DEBUG)      $(CPP_FFT)         \
+	      $(CPP_VFFT)    $(CPP_GEMM)       $(CPP_GAMMA)       \
+	      $(CPP_GAUSS)   $(CPP_PARALLEL)   $(CPP_MPI)         \
+	      $(CPP_OPENMP)  $(CPP_PESSL)      $(CPP_MAPPED_WENO)
+
+CPP_OPTION = $(CPP_DEFINED:%=$(CPP)%)
+
+#=========================================================================
+
+OPTION_FLAG  = $(ADD_OPTION) $(CPP_OPTION) $(SRC_PATH) $(MOD_PATH) 
+OPTION_FLAG += $(LIB) $(LIBRARY) 
+
+#=========================================================================
+# Update Flags and compiler
+
+F_COMPILER_FLAG += $(OPTION_FLAG)
+C_COMPILER_FLAG += $(OPTION_FLAG)
+
+F_COMPILE = $(FF) $(F_COMPILER_FLAG) 
+C_COMPILE = $(CC) $(C_COMPILER_FLAG)
+
+
+#=========================================================================
+# Build targets
+
+TARGET     = $(PS_LIBDIR)lib$(PS_LIBRARY_NAME).a
+
+LIB_SOURCE = $(LIBSC_MPI:%=%.o)
+LIB_SOURCE = $(LIBSC_DEBUG:%=%.o)
+LIB_SOURCE = $(LIBSC:%=%.o)
+
+PseudoPack:
+	@$(MAKE) System_Info
+	@$(MAKE) Directory_Check
+	@touch $(PS_MAIN_PATH)Source/Module_PseudoPack*.F
+	@$(MAKE) $(TARGET) 
+	@$(MAKE) clean
+	@$(MAKE) System_Done
+
+$(TARGET) : $(TARGET)($(LIB_SOURCE)) $(PS_LIB_NAME).h
+	ranlib  $@
+	-if (test -f $(PS_MODDIR)$(PS_MOD_NAME).mod) ; then \
+	   $(COPY) $(PS_MODDIR)$(PS_MOD_NAME).mod           \
+	           $(PS_MODDIR)$(PS_MODULE_NAME).mod ;      \
+	 fi
+
+.F.a:
+	$(F_COMPILE) -c $< -o $(PS_OBJDIR)$%
+	$(ARCHIVE) $@ $(PS_OBJDIR)$%
+
+#=========================================================================
+include $(MAKE_DIR)/makeSetup
+
+#=========================================================================
+#  Utilities
+
+.PHONY : clean fresh
+
+clean:
+	$(KILL) core* *.o *.mod *.F log ifc* *.h *.lst
+
+fresh:
+	$(KILL) core* *.o *.mod *.F log ifc* *.h *.lst
+	$(KILL) $(PS_LIBDIR)* $(PS_MODDIR)* $(PS_LSTDIR)* $(PS_OBJDIR)*
+

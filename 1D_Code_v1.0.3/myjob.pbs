@@ -1,0 +1,57 @@
+## This (or a blank line) is a comment (2 '##' at beginning)
+## specify a jobname ( '#PBS' indicates a PBS specification)
+#PBS -N 1D_Euler_HiMa
+## declare job non-rerunnable
+#PBS -r n
+## specify a name for the output file
+#PBS -o 1D_Euler_HiMa.out
+## join stderr to stdout, so we have just one job log file
+#PBS -j oe
+## mail to user on a=abort, b=begin, e=end
+#PBS -m abe
+## specify user for mail
+#PBS -M sdavis76@roahn.sdsu.edu
+## specify number of nodes and number of CPUs per node
+## this examples allocates 2 CPUs on each of 4 nodes
+#PBS -l nodes=1:ppn=1
+## specify wallclock time
+#PBS -l walltime=36:00:00
+## export current environment variables to the job's nodes
+#BS -V
+
+## PBS specifications are done; now set up the job with shell
+## shell commands (no '#' at beginning) and run your executable
+
+## switch to the job's working directory, provided by PBS
+## it's the directory from which you submitted your job.
+cd $PBS_O_WORKDIR
+## useful info for the log file
+echo Master process running on `hostname`
+echo Directory is `pwd`
+echo PBS has allocated the following nodes:
+echo `cat $PBS_NODEFILE`
+## put in a timestamp
+echo Starting execution at `date`
+PATH=$PBS_O_PATH
+
+## PBS has selected the nodes; now set the number of CPUs
+NPROCS=`wc -l < $PBS_NODEFILE`
+echo This job has allocated $NPROCS CPUs
+
+## create nodefile (with duplicates removed) for use by mpdboot
+NODEFILE_UNIQ=/tmp/`basename ${PBS_NODEFILE}`.uniq
+cat $PBS_NODEFILE | uniq > $NODEFILE_UNIQ
+# Boot the MPI2 engine.
+mpdboot --verbose --rsh=rsh --file=${NODEFILE_UNIQ}
+
+rm -f Output/*
+./Executable/WENO_1d Input/WENO.input
+
+## Another timestamp at end
+echo Finished execution at `date`
+
+# Shut down the MPI2 engine and exit the PBS script.
+mpdallexit
+
+exit 0
+

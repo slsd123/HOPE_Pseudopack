@@ -1,0 +1,53 @@
+#=========================================================================
+#               ---- Compiler Optimization Flag ----
+
+     General_Flag  = -ffree-form
+     General_Flag += -frange-check -fimplicit-none
+     General_Flag += -fdefault-double-8 -fdefault-real-8 
+#    General_Flag += -fdefault-integer-8
+#    General_Flag += -fno-automatic
+#    General_Flag += -fmax-stack-var-size=
+
+ Optimization_Flag  = -O$(OPTIMIZATION_LEVEL)
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+         MPI_Flag  = 
+     Library_Flag  = 
+    Parallel_Flag  = 
+endif
+
+     OPEN_MP_Flag  = -fopenmp
+
+         CPP_Flag  = 
+
+        Info_Flag  = 
+
+ifeq ($(strip $(DEBUG)),on)
+  Optimization_Flag  = 
+endif
+         Debug_Flag  = -ffpe-trap=invalid,zero,overflow,underflow,denormal 
+         Debug_Flag += -fbounds-check -Wall
+#        Debug_Flag += 
+
+       Profile_Flag  = 
+
+         MOD_OPTION  = -M
+#=========================================================================
+#               ---- CPP ----
+
+CPP                 = -D
+CPP_ONLY            = 
+Debug_Line          = -fd-lines-as-code
+
+#=========================================================================
+#               ---- Loader ----
+
+Loader_Phase        = 
+
+#=========================================================================
+#               ---- Compiler_Option ----
+
+ F_COMPILER_FLAG  = $(General_Flag) 
+ F_COMPILER_FLAG += $(Optimization_Flag) 
+ F_COMPILER_FLAG += $(Library_Flag) 
+     LOADER_FLAG  = 

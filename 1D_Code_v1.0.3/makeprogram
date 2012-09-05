@@ -1,0 +1,202 @@
+.SILENT :
+#.IGNORE :
+.SUFFIX : .f .F .f90 .F90 .a .c .o .mod .h
+
+#=========================================================================
+#  Machine Name :
+
+ machine_id = 3002
+
+ MACHINE_ID = $(machine_id)
+
+#=========================================================================
+#
+ Silent_Make = -s
+
+MAKE        = make -f makeprogram $(Silent_Make)
+
+#=========================================================================
+#
+  Tar_Dir        = 
+  Tar_Filename   = Program_052006b
+
+#=========================================================================
+#  Code Options
+
+ PROGRAM_PATH       = ../WENO_1D/
+    CODE_PATH       = ../WENO_1D/test
+
+ CODE_VERSION       = HAP
+ TARGET             = WENO
+ DIMENSION          = 1
+
+ PARALLEL_OR_SERIAL = Serial
+#PARALLEL_OR_SERIAL = Parallel
+#PARALLEL_OR_SERIAL = OpenMP
+
+#USE_ESSL_LIBRARY   = on
+ USE_ESSL_LIBRARY   = off
+
+ OPTIMIZATION_LEVEL = 2
+
+ COMPILER_OPTION    = on
+#DEBUG              = on
+ DEBUG              = off
+ PROFILE            = off
+ WARNING            = off
+
+#=========================================================================
+#               ---- CPP Pre-Processor ----
+
+#CPP_MR               = MULTI_RESOLUTION
+#CPP_MR_OUTPUT        = MR_OUTPUT
+#CPP_WENO_OPTION_A    = SHU_VERSION
+#CPP_WENO_OPTION_B    = LF_COMPONENT_WISE
+
+#--------------
+ CPP_MACHINE     = $(MACHINE_TYPE)
+ CPP_ANN         = ANN
+xCPP_ANN_Interp  = BILINEAR_INTERP
+ CPP_ANN_Interp  = RBF_INTERP
+ CPP_DEBUG       = DEBUG
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel) 
+ CPP_MPI       = PARALLEL_MPI
+endif
+
+ifeq ($(strip $(PARALLEL_OR_SERIAL)),OpenMP)
+ CPP_OPENMP    = PARALLEL_OPENMP
+endif
+
+ CPP_DIMENSION =   ONE_DIMENSION
+ifeq ($(strip $(DIMENSION)),2) 
+ CPP_DIMENSION =   TWO_DIMENSION 
+endif
+ifeq ($(strip $(DIMENSION)),3) 
+ CPP_DIMENSION = THREE_DIMENSION 
+endif
+
+CPP_DEFINED = $(CPP_DIMENSION)       $(CPP_MACHINE)                          \
+	      $(CPP_DEBUG)           $(CPP_MPI)             $(CPP_OPENMP)    \
+	      $(CPP_WENO_OPTION_A)   $(CPP_WENO_OPTION_B)                    \
+              $(CPP_ANN)             $(CPP_ANN_Interp) 
+
+CPP_OPTION = $(CPP_DEFINED:%=$(CPP)%)
+
+#=========================================================================
+#  Executable Path and Name
+
+ EXEDIR = Executable/
+ SRCDIR = Source/
+ MODDIR = Module/
+ OBJDIR = Object/
+ LSTDIR = Listing/
+
+ SUBDIR = 
+
+include $(SRCDIR)/makeSource
+
+#=========================================================================
+#               ---- PseudoPack library ----
+
+ PS_MAIN_PATH = ./../../PseudoPack_2006/
+ PS_VERSION   = dd
+
+#=========================================================================
+#               ---- MakeFile Directory ----
+
+MAKE_DIR     = MakeFiles
+
+include $(MAKE_DIR)/makeMachine
+
+MACHINE_PATH = $(MACHINE_TYPE)/$(MACHINE_OS)/$(MACHINE_COMPILER)
+MAKE_PATH    = $(MAKE_DIR)/Compilers/$(MACHINE_PATH)
+
+include $(MAKE_DIR)/makeBase
+include $(MAKE_PATH)/make$(MACHINE_COMPILER)
+include $(MAKE_PATH)/Compiler_Option
+
+#=========================================================================
+#               ---- PseudoPack Library ----
+
+ PS_LIB_NAME  = pseudopack
+ PS_MOD_NAME  = pseudopack
+
+ifneq ($(strip $(PS_VERSION)),)
+ PS_LIBRARY_NAME = $(strip $(PS_LIB_NAME))_$(strip $(PS_VERSION))
+ PS_MODULE_NAME  = $(strip $(PS_MOD_NAME))_$(strip $(PS_VERSION))
+else
+ PS_LIBRARY_NAME = $(strip $(PS_LIB_NAME))
+ PS_MODULE_NAME  = $(strip $(PS_MOD_NAME))
+endif
+
+PS_SRCDIR  = $(PS_MAIN_PATH)Source/
+PS_LIBDIR  = $(PS_MAIN_PATH)Library/$(MACHINE_PATH)/$(PARALLEL_OR_SERIAL)/
+PS_MODDIR  = $(subst Library,Module,$(PS_LIBDIR))
+PS_INCDIR  = $(PS_MAIN_PATH)Include/
+
+PS_LIBRARY  = -L $(PS_LIBDIR) -l$(PS_LIBRARY_NAME)
+
+#=========================================================================
+
+SRCPATH = -I $(SRCDIR) $(SUBDIR:%=-I $(SRCDIR)%) -I $(PS_SRCDIR) -I $(PS_INCDIR)
+MODPATH = $(MOD_OPTION) $(MODDIR) -I $(PS_MODDIR)
+  VPATH = $(SRCDIR):$(PS_SRCDIR)
+
+#=========================================================================
+
+OPTION_FLAG = $(ADD_OPTION) $(CPP_OPTION) $(SRCPATH) $(MODPATH) 
+OPTION_FLAG += $(USER_DEFINED_OPTION) 
+
+#=========================================================================
+# Update Flags and compiler
+
+F_COMPILER_FLAG += $(OPTION_FLAG)
+F_COMPILE        = $(FF) $(F_COMPILER_FLAG) 
+
+#=========================================================================
+# Object files
+
+OBJS = $(Object:%=%.o)
+SRCS = $(Object:%=%.F)
+
+OBJECTS = $(OBJS:%=$(OBJDIR)%)
+SOURCES = $(SRCS:%=$(SRCDIR)%)
+
+ EXECUTABLE = $(EXEDIR)$(TARGET)_$(DIMENSION)d
+
+#=========================================================================
+# Build targets
+
+all:
+	@$(MAKE) System_Info
+	@$(MAKE) Directory_Check
+	@$(MAKE) $(TARGET)
+	@echo
+	@echo 
+	@$(MAKE) clean
+	@$(MAKE) System_Done
+
+$(TARGET): $(OBJECTS)
+	@echo 'Linking   .... ' 
+	$(F_COMPILE) $(OBJECTS) -o  $(EXECUTABLE) $(PS_LIBRARY) $(LIB) 
+
+$(OBJDIR)%.o: $(SRCDIR)%.F
+	@echo 'Compiling .... ' $<
+	$(F_COMPILE) -c $< -o $@
+
+#=========================================================================
+include $(MAKE_DIR)/makeSetup
+include $(MAKE_DIR)/makeCode
+
+#=========================================================================
+#  Utilities
+
+.PHONY: clean
+
+clean:
+	$(KILL) core* *.o *.mod *.F log ifc* *.h *.lst
+
+fresh:
+	$(KILL) core* *.o *.mod log $(EXECUTABLE) $(MODDIR)* $(OBJDIR)*
+	$(KILL) *.h *.lst

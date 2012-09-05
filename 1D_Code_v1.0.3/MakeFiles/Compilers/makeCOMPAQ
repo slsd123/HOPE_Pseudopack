@@ -1,0 +1,39 @@
+#=========================================================================
+# Compiler Option
+
+ ADD_OPTION  = $(MATH_LIBRARY)
+
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Serial)
+  LIBRARY += -ldxml
+ endif
+
+#-------------------------------------------------------------------------
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  ADD_OPTION += -hpf -hpf_target gmpi -show hpf_near -show hpf_punt
+
+  LIBRARY += -ldxmlp
+ endif
+
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),OpenMP)
+  ADD_OPTION += -omp -check_omp
+ #ADD_OPTION += -threads
+
+  LIBRARY += -ldxmlp
+ endif
+#-------------------------------------------------------------------------
+
+ifeq ($(strip $(PROFILE)),on)
+ ADD_OPTION += $(Profile_Flag)
+endif
+
+ifeq ($(strip $(DEBUG)),on)
+ ADD_OPTION += $(Debug_Flag)
+endif
+
+ifeq ($(strip $(WARNING)),on)
+ ADD_OPTION += $(Info_Flag)
+endif
+
+#-------------------------------------------------------------------------
+ADD_Option +=
+

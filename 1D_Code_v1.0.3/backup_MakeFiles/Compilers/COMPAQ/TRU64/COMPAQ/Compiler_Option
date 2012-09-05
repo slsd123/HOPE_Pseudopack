@@ -1,0 +1,50 @@
+#=========================================================================
+#               ---- Compiler Optimization Flag ----
+
+     General_Flag  = -free
+     General_Flag += -double_size 64
+     General_Flag += -fpconstant
+
+ Optimization_Flag  = -O$(OPTIMIZATION_LEVEL)
+ Optimization_Flag += -fast -tune host -arch host -om 
+
+     OPEN_MP_Flag  = -qsmp=noauto
+
+         CPP_Flag  =-cpp
+
+         MPI_Flag  =
+     Library_Flag  = -math_library fast
+
+        Info_Flag  = -w1 -warn declarations -warn unused -warn argument_checking
+
+ifeq ($(strip $(DEBUG)),on)
+  Optimization_Flag  =
+endif
+
+         Debug_Flag  = -g -C -u
+         Debug_Flag += -source_listing
+
+       Profile_Flag  = -p1
+       Profile_Flag += -pg
+
+        MOD_OPTION  = -module
+#=========================================================================
+#               ---- CPP ----
+
+CPP                = -D
+CPP_ONLY           = -P
+Debug_Line         = -d_lines
+
+#=========================================================================
+#               ---- Loader ----
+
+Loader_Phase        =
+
+#=========================================================================
+#               ---- Compiler_Option ----
+
+ F_COMPILER_FLAG  = $(General_Flag) $(CPP_Flag)
+ F_COMPILER_FLAG += $(Optimization_Flag)
+ F_COMPILER_FLAG += $(Library_Flag)
+     LOADER_FLAG  =
+

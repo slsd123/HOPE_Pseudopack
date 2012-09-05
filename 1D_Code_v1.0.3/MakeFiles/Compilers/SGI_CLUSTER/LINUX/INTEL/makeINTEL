@@ -1,0 +1,79 @@
+ifeq ($(strip $(SITE_ID)),SDSU)
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  COMPILER_PATH = /opt/intel_fc_80/
+  COMPILER_ALT  = -f90=/opt/intel_fc_80/bin/ifort
+
+  C_COMPILER    = $(COMPILER_PATH)mpiCC
+  F_COMPILER    = $(COMPILER_PATH)mpif90 $(COMPILER_ALT)
+
+  L_PATH        = 
+  L_LIB         = 
+ else
+  COMPILER_PATH =/opt/intel_fc_80/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)icc
+  F_COMPILER    = $(COMPILER_PATH)ifort
+
+  L_PATH        =
+  L_LIB         =
+ endif
+endif
+
+ifeq ($(strip $(SITE_ID)),LLNL)
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  COMPILER_PATH =/usr/local/intel/compiler80/ia32/bin/ 
+# COMPILER_ALT  = -f90=/usr/local/intel/compiler80/ia32/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)mpiCC
+  F_COMPILER    = $(COMPILER_PATH)mpif90 $(COMPILER_ALT)
+
+  L_PATH        = -L$(COMPILER_PATH)lib -L/usr/lib/mpi/lib
+  L_LIB         = /usr/lib/mpi/lib/pgf90_farg.o -lF90 -lCEPCF90 -lPEPCF90
+  L_LIB        += -lmpi -lelan -lelan3 -lrmscall
+ else
+  COMPILER_PATH = /usr/local/intel/compiler80/ia32/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)icc
+  F_COMPILER    = $(COMPILER_PATH)ifort
+
+  L_PATH        =
+  L_LIB         =
+ endif
+endif
+
+
+ifeq ($(strip $(SITE_ID)),IMPA)
+ ifeq ($(strip $(PARALLEL_OR_SERIAL)),Parallel)
+  COMPILER_PATH  /usr/local/intel/compiler80/ia32/bin=
+# COMPILER_ALT  = -f90=/usr/local/intel/compiler80/ia32/bin/
+
+  C_COMPILER    = $(COMPILER_PATH)mpiCC
+  F_COMPILER    = $(COMPILER_PATH)mpif90 $(COMPILER_ALT)
+
+  L_PATH        = -L$(COMPILER_PATH)lib -L/usr/lib/mpi/lib
+  L_LIB         = /usr/lib/mpi/lib/pgf90_farg.o -lF90 -lCEPCF90 -lPEPCF90
+  L_LIB        += -lmpi -lelan -lelan3 -lrmscall
+ else
+  COMPILER_PATH = /usr/local/intel/compiler80/ia32/bin 
+
+  C_COMPILER    = $(COMPILER_PATH)icc
+  F_COMPILER    = $(COMPILER_PATH)ifort
+
+  L_PATH        =
+  L_LIB         =
+ endif
+endif
+
+#-----------------------------------------------------------
+#
+
+ CC              = $(C_COMPILER)
+ C_COMPILER_FLAG =
+
+ FF              = $(F_COMPILER)
+ F_COMPILER_FLAG =
+
+ LD              = $(FF)
+ LOADER_FLAG     =
+
+ LIB             = $(L_PATH) $(L_LIB)

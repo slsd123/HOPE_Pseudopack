@@ -1,0 +1,357 @@
+                     Intel(R) Fortran Compiler / Itanium(R) Help
+                     ===========================================
+
+usage: ifort [options] file1 [file2 ...]
+
+  where options represents zero or more compiler options
+
+        fileN is a Fortran source (.f .for .ftn .f90 .fpp), assembly (.s),
+            object (.o), static library (.a), or other linkable file
+
+
+  Commonly used options may be placed in the ifort.cfg file.
+
+                       Compiler Option List
+                       --------------------
+Performance
+-----------
+-O2    enable optimizations (DEFAULT)
+-O1    optimize for maximum speed, but disable some optimizations which
+       increase code size for a small speed benefit.  Also disables software
+       pipelining and global code scheduling
+-O3    enable -O2 plus more aggressive optimizations that may not improve
+       performance for all programs
+-O0    disable optimizations
+-O     same as -O2
+-fast  enable -O3 -ipo -static
+-falias       assume aliasing in program (DEFAULT)
+-fno-alias    assume no aliasing in program
+-ffnalias     assume aliasing within functions (DEFAULT)
+-fno-fnalias  assume no aliasing within functions, but assume aliasing across
+              calls
+-mp           maintain floating point precision (disables some optimizations)
+-mp1          improve floating-point precision (speed impact is less than -mp)
+-[no]fltconsistency 
+              specify that improved floating-point consistency should be used
+-fpe{0|1|3}   specifies behavior on floating point exceptions
+-tpp1  optimize for Itanium(R) processor
+-tpp2  optimize for Itanium(R) 2 processor (DEFAULT)
+
+Advanced Performance
+--------------------
+Enable and specify the scope of Interprocedural (IP) Optimizations:
+-ip     enable single-file IP optimizations (within files)
+-ipo[n] enable multi-file IP optimizations (between files)
+-ipo_c  generate a multi-file object file (ipo_out.o)
+-ipo_S  generate a multi-file assembly file (ipo_out.s)
+
+Modify the behavior of IP:
+-ip_no_inlining    disable IP inlining (requires -ip or -ipo)
+-ipo_obj           force generation of real object files (requires -ipo)
+-ipo_separate      create one object file for every source file 
+                   (overrides -ipo[n])
+
+Other Advanced Performance Options:
+-[no]reentrancy:keyword
+            specify whether the threaded, reentrant run-time support
+            should be used
+            Keyword:  none, threaded, async
+-nolib_inline disable inline expansion of intrinsic functions
+-pad        enable(DEFAULT) changing variable and array memory layout
+-nopad      disable changing variable and array memory layout
+-unroll0    disable loop unrolling
+
+-safe_cray_ptr  Cray pointers do not alias with other variables
+-prof_dir <d>   specify directory for profiling output files (*.dyn and *.dpi)
+-prof_file <f>  specify file name for profiling summary file
+-prof_gen       instrument program for profiling
+-prof_use       enable use of profiling information during optimization
+-fnsplit[-]     enable/disable function splitting (enabled with -prof_use)
+-qp             compile and link for function profiling with UNIX gprof tool
+-p              same as -qp
+
+-opt_report               generate an optimization report to stderr
+-opt_report_file<file>    specify the filename for the generated report
+-opt_report_level[level]  specify the level of report verbosity (min|med|max)
+-opt_report_phase<name>   specify the phase that reports are generated against
+-opt_report_routine<name> reports on routines containing the given name
+-opt_report_help          display the optimization phases available for 
+                          reporting
+
+-tcheck               generate instrumentation to detect multi-threading bugs
+                      (requires Intel(R) Threading Tools; cannot be used with
+                      compiler alone)
+-openmp               enable the compiler to generate multi-threaded code
+                      based on the OpenMP directives
+-openmp_profile       link with instrumented OpenMP runtime library to
+                      generate OpenMP profiling information for use with the
+                      OpenMP component of the VTune(TM) Performance Analyzer
+-openmp_stubs         enables the user to compile OpenMP programs in
+                      sequential mode.  The openmp directives are ignored and
+                      a stub OpenMP library is linked (sequential)
+-openmp_report{0|1|2} control the OpenMP parallelizer diagnostic level
+
+-parallel             enable the auto-parallelizer to generate multi-threaded
+                      code for loops that can be safely executed in parallel
+-par_report{0|1|2|3}  control the auto-parallelizer diagnostic level
+-par_threshold[n]     set threshold for the auto-parallelization of loops
+                      where n is an integer from 0 to 100
+
+-ansi_alias[-]        enable(DEFAULT)/disable use of ANSI aliasing rules in
+                      optimizations; user asserts that the program adheres to
+                      these rules
+-complex_limited_range[-] enable/disable(DEFAULT) the use of the basic
+                       algebraic expansions of some complex arithmetic
+                       operations.  This can allow for some performance
+                       improvement in programs which use a lot of complex
+                       arithmetic at the loss of some exponent range.
+-ftz[-]                enable/disable flush denormal results to zero
+-ivdep_parallel        make ivdep directives mean no loop carried dependencies
+
+-IPF_fma[-]               enable/disable the combining of floating point
+                          multiplies and add/subtract operations
+-IPF_fltacc[-]            enable/disable optimizations that affect floating
+                          point accuracy
+-IPF_flt_eval_method0     floating point operands evaluated to the precision
+                          indicated by program
+-IPF_fp_speculation<mode> enable floation point speculations with the
+                          following <mode> conditions:
+                    fast   - speculate floating point operations (DEFAULT)
+                    safe   - speculate only when safe
+                    strict - same as off
+                    off    - disables speculation of floating-point operations
+-IPF_fp_relaxed[-]     enable/disable use of faster but slightly less accurate
+                       code sequences for math functions
+-auto_ilp32            specify that the application cannot exceed a 32-bit
+                       address space (-ipo[n] required)
+-[no]recursive         compile all procedures for possible recursive execution
+
+Output, Debug
+-------------
+-c         compile to object (.o) only, do not link
+-S         compile to assembly (.s) only, do not link (*I)
+-use_asm   produce objects through assembler
+-fcode-asm produce assembly file with optional code annotations (requires -S)
+-fsource-asm produce assembly file with optional source annotations
+           (requires -S)
+-f[no]verbose-asm produce assembly file with compiler comments (DEFAULT)
+           (requires -S)
+-[no]machine_code
+           include a machine-language representation of the compiled code if
+           a listing is generated
+-[no]show:<keyword>
+           include information in a listing
+           keywords:  [no]code, [no]include, [no]map
+-list      print source listing on stdout
+-list -show include
+           print source listing on stdout with INCLUDE files expanded
+-o<file>   name output file
+-g         produce symbolic debug information in object file (implies -O0 when
+           another optimization option is not explicitly set)
+-inline_debug_info preserve the source position of inlined code instead
+           of assigning the call-site source position to inlined code
+
+Fortran Preprocessor
+--------------------
+-D<name>[=<text>]  define macro
+-noD       specifies that any /D macros go to the preprocessor only, and not 
+             to the compiler too
+-E         preprocess to stdout
+-EP        preprocess to stdout omitting #line directives
+-P, -F     preprocess to file omitting #line directives
+-preprocess_only
+           preprocess to file omitting #line directives
+-fpp[n]    run Fortran preprocessor on source files prior to compilation
+     n=0   disable CVF and # directives, equivalent to no fpp
+     n=1   enable CVF conditional compilation and # directives (DEFAULT)
+     n=2   enable only # directives
+     n=3   enable only CVF conditional compilation directives
+-cpp[n]    same as -fpp[n]
+-I<dir>    add directory to include file search path
+-U<name>   remove predefined macro
+-X         remove standard directories from include file search path
+-nostdinc  same as -X
+
+FCE/Component Control
+---------------------
+-[no]module [path]
+         specify path where mod files should be placed and first location to
+         look for mod files
+
+-Qoption,<str>,<opts>   pass options <opts> to tool specified by <str>
+-Qlocation,<str>,<dir>  set <dir> as the location of tool specified by <str>
+-Qinstall <dir>         set <dir> as root of compiler installation
+
+Language
+--------
+-i2            set default KIND of integer variables is 2
+-i4            set default KIND of integer variables is 4
+-i8            set default KIND of integer variables is 8
+-integer_size <size>
+               specifies the default size of integer and logical variables
+               size:  16, 32, 64
+-r8            set default size of REAL to 8 bytes
+-r16           set default size of REAL to 16 bytes
+-real_size <size>
+               specify the size of REAL and COMPLEX declarations, constants,
+               functions, and intrinsics
+               size: 32, 64, 128
+-autodouble    same as -r8
+-double_size <size>
+               defines the size of DOUBLE PRECISION and DOUBLE COMPLEX 
+               declarations, constants, functions, and intrinsics
+               size:  64, 128
+-[no]fpconstant
+               extends the precision of single precision constants assigned
+               to double precision variables to double precision
+-[no]intconstant
+               use Compaq Fortran 77 semantics, rather than Compaq Fortran
+               90, to determine kind of integer constants
+
+-DD            compile debug statements, indicated by D in column 1.  This
+               option prevents the definition of a macro named D using the
+               command line -Dname option (use -Dname=n syntax instead)
+-[no]d_lines   compile debug statements (indicated by D in column 1)
+
+-FR            specifies source files are in free format
+-FI            specifies source files are in fixed format
+-[no]fixed     interpret Fortran source files in the specified form
+-[no]free      interpret Fortran source files in the specified form
+-72            specify 72 column lines for fixed form sources
+-80            specify 80 column lines for fixed form sources
+-132           specify 132 column lines for fixed form sources
+-extend_source same as -132
+-[no]extend_source [size]
+               Determines the column that ends the statement field of each
+               source line in a fixed-format file.  -extend_source default
+               size is 132
+               size:  72, 80, 132
+-ccdefault <keyword>
+                 specify default carriage control for units 6 and *
+                 keywords:  default, fortran, list, or none
+-stand <keyword>
+               specifies level of conformance with ANSI standard to check for
+               keyword:  f90, f95, none
+-[no]pad_source    make compiler acknowledge blanks at the end of a line
+-dps           enable DEC* PARAMETER statement recognition (DEFAULT)
+-nodps         disable DEC* PARAMETER statement recognition
+-[no]altparam  specify if alternate form of parameter constant declarations
+               (without parenthesis) is recognized
+
+-1, -onetrip      execute any DO loop at least once
+-f66, -66         allow extensions that enhance FORTRAN-66 compatibility
+-[no]f77rtl       specify that the Fortran 77 specific run-time support should 
+                  be used
+-auto             make all local variables AUTOMATIC
+-auto_scalar      make scalar local variables AUTOMATIC (DEFAULT)
+-[no]automatic
+                  puts local variables on the run-time stack
+-save             save all variables (static allocation); opposite of -auto
+-u, -implicitnone set IMPLICIT NONE by default
+-common_args      assume "by reference" subprogram arguments may alias one
+                  another
+-[no]mixed_str_len_arg
+                  indicates whether hidden lengths are passed after their 
+                  character argument or after all arguments.
+-assume <keyword>
+                  specify assumptions made by the optimizer and code generator
+                  keywords:  none, [no]accuracy_sensitive, [no]byterecl,
+                            [no]buffered_io, [no]dummy_aliases, [no]minus0,
+                            [no]protect_constants, [no]source_include, 
+                            [no]underscore
+-vms              enable VMS and DEC statement extensions
+-zero[-]          enable/disable(DEFAULT) implicitly initialize all data to
+                  zero
+
+-Qdyncom"blk1,blk2,..."  make given common blocks dynamically-allocated
+
+-nbs          treat backslash as a normal character, not an escape character
+-us           append an underscore to external subroutine names
+-nus          do not append an underscore to external subroutine names
+-lowercase    change routine names to all lowercase (DEFAULT)
+-uppercase    change routine names to all uppercase
+-names <keyword>
+              specify how source code identifiers and external names are
+              interpreted
+              keyword:  as_is, lowercase, uppercase
+-[no]align    analyze and reorder memory layout for variables and arrays
+-Zp[n]        specify alignment constraint for structures (n=1,2,4,8,16)
+-align <keyword>
+              specify how data items are aligned
+              keyword:  [no]commons, dcommons, [no]records, rec1byte, 
+                        rec2byte, rec4byte, rec8byte, sequence
+-y, -syntax   perform syntax check only
+-syntax_only  perform syntax check only
+
+Compiler Diagnostics
+--------------------
+-cm        suppress all comment messages
+-q         suppress printing errors to stderr
+-w         disable all warnings
+-Wn        disable warnings (n=0) or show warnings (n=1, DEFAULT)
+-w90, -w95 suppress messages about use of non-standard Fortran
+-[no]warn <keywords>
+           specifies the level of warning messages issued.
+           keywords:  [no]alignments, [no]argument_checking, [no]declarations,
+                      [no]errors, [no]fileopt, [no]general, [no]ignore_loc, 
+                      [no]stderrors, [no]truncated_source, [no]uncalled,
+                      [no]uninitialized, [no]unused, [no]usage
+-[no]traceback
+           specify whether the compiler generates PC correlation data used
+           to display a symbolic traceback rather than a hexidecimal traceback
+           at runtime failure
+-[no]error_limit <size>
+           specify the maximum number of error-level or fatal-level compiler
+           errors allowed
+
+Miscellaneous
+-------------
+-help         print this help message
+-V            display compiler version information
+-[no]logo     [do not] display compiler version information
+-dryrun       show driver tool commands but do not execute tools
+-v            show driver tool commands and execute tools
+-Tf<file>     compile file as Fortran source
+-nobss_init   disable placement of zero-initialized variables in BSS (use DATA)
+-Kpic, -KPIC  generate position independent code (OFF by default)
+-fpic, -fPIC  generate position independent code (OFF by default)
+-convert <keyword>
+              specify the format of unformatted files containing numeric data
+              keyword:  big_endian, cray, ibm, little_endian, native, vaxd, 
+-[no]fpscomp [keyword]
+              specify the level of compatibility to adhere to with Fortran
+              PowerStation
+              keywords:  all, none, [no]filesfromcmd, [no]general,
+                        [no]ioformat, [no]ldio_spacing, [no]libs, [no]logicals
+-Knopic, -KNOPIC do not generate position independent code
+-fr32         disable use of high floating point registers
+
+Linking/Linker
+--------------
+-L<dir>        instruct linker to search <dir> for libraries
+-i_dynamic     link Intel provided libraries dynamically
+-i-static      link Intel provided libraries statically
+-dynamic-linker<file>
+               select dynamic linker other than the default
+-no_cpprt      do not link in C++ runtime libraries
+-nodefaultlibs do not use standard libraries when linking
+-nostartfiles  do not use standard startup files when linking
+-nostdlib      do not use standard libraries and startup files when linking
+-static        prevents linking with shared libraries
+-shared        produce a shared object
+-static-libcxa link Intel libcxa C++ library statically
+-shared-libcxa link Intel libcxa C++ library dynamically, overrides the default
+-T <file>      direct linker to read link commands from <file>
+-Xlinker <val> pass <val> directly to the linker for processing
+-Wl,<o1>[,<o2>,...] pass options o1, o2, etc. to the linker for processing
+-Wp,<o1>[,<o2>,...] pass options o1, o2, etc. to the preprocessor
+-Vaxlib        link with portability library
+-math_library <keyword>
+                specify the math library routines to use
+                Keyword:  accurate    Ignored on Itanium(R)
+-[no]threads    specify whether or not multi-threaded libraries should be
+                linked against
+
+Copyright (C) 1985-2004, Intel Corporation.  All rights reserved.
+
+* Other brands and names are the property of their respective owners.

@@ -1,0 +1,7 @@
+F90_Files = $(basename $(wildcard *.f90))
+
+all:
+	echo $(F90_Files)
+	for f90 in $(F90_Files); do \
+	  mv $$f90.f90 $$f90.F; \
+	done 
