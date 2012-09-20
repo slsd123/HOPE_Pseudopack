@@ -1,4 +1,4 @@
-function [Qfp] = Interpolate_Fluid_To_Particle(N0, N5, NV, Index, Order, Xp, dx, x, Q)
+function [Qfp, x_stencil] = Interpolate_Fluid_To_Particle(N0, N5, NV, Index, Order, Xp, dx, x, Q)
 % Original version: function [Qfp] = Interpolate_Fluid_To_Particle(N0, N5, NV, Index, Order, Xp, dx, x, Q, x1)
 % JP version: function [Qfp] = Interpolate_Fluid_To_Particle(N0, N5, NV, Index, Order, Xp, dx, x, Q)
 
@@ -17,6 +17,7 @@ for np = 1 : Np
    
     [x_n] = Particle_Locate_HostCell(N0, N5, Xp(np), x0, x1);
     
-    [Qfp(:,np)] = ENO_Interpolation(NV, Order, dx, x, Q, dPdx, Xp(np), x_n, Left, cx);
+    [Qfp(:,np), x_stencil(:,np)] = ENO_Interpolation(NV, Order, dx, x, Q, dPdx, Xp(np),...
+        x_n, Left, cx);
  
 end

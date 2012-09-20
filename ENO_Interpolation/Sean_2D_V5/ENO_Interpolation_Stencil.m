@@ -39,7 +39,7 @@ Top(:, M0           ) = 1;
 Top(:, M5-Order+1:M5) = M5-Order;
 for j = N0:N5
     for i = M0:M5-Order
-        is = i-floor(Order/2);
+        is = i+floor(Order/2);
         for m = 2:Order
             if ((is+1) <= M5 && (is+1) > M0)
                 if (abs(c2b(j,is+1,m)) < abs(c2b(j,is,m)))

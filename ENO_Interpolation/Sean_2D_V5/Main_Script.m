@@ -3,7 +3,7 @@ clear all; clc%; close all;
 % Number of particles
 Np = 500;
 % Check the stencil for particle number:
-particle = 155;
+particle = 160;
 
 % Constants
 NV    = 4;
@@ -33,7 +33,7 @@ y        =  y0:dy:y1;
 M0       =  1;
 M5       =  N_grid_y;
 
-[X,Y] = meshgrid(y0:dy:y1,y0:dy:y1);
+[X,Y] = meshgrid(x0:dx:x1,y0:dy:y1);
 
 % Putting the source onto the grid
 offset_m = 50;
@@ -55,6 +55,12 @@ elseif Initial == 2
     Q(:,:,3) = (heaviside(-Y))';
     Q(:,:,4) = (heaviside(-Y))';
     Q(:,floor(N_grid_x/3):floor(2*N_grid_x/3),:) = 1;
+    
+    Q(:,:,1) = (heaviside(-Y))';
+    Q(:,:,2) = (heaviside(-Y))';
+    Q(:,:,3) = (heaviside(-Y))';
+    Q(:,:,4) = (heaviside(-Y))';
+    Q(:,floor(N_grid_x/3):floor(2*N_grid_x/3),:) = 1;
 end
 
 % Particle initialization
@@ -68,7 +74,8 @@ dYp = (y_1-y_0)/(Np);
 
 Xp  = x_0+dXp/2:dXp:x_1-dXp/2;
 Yp  = y_0+dYp/2:dYp:y_1-dYp/2;
-% Yp(:) = 0;
+Xp(1:Np/2)    =  1;
+Xp(Np/2+1:Np) = -1;
 
 [Qfp, x_stencil, y_stencil, c1, c2, c2b] = Interpolate_Fluid_To_Particle(N0, N5, M0, M5,...
     NV, Index, Order, Xp, Yp, dx, dy, x, y, Q);
@@ -77,13 +84,13 @@ Yp  = y_0+dYp/2:dYp:y_1-dYp/2;
 figure(2),plot(Qfp(2,:)  ,'.r'), title('Qfp')
 
 figure(3)
-contourf(X(1,:),Y(:,1),Q(:,:,2),1), hold on
-plot(Xp,Yp,'.y'), hold on,  colorbar('EastOutside')
-plot(x(x_stencil(:,particle)),y(y_stencil(particle,:)),'^-g'), hold on
-plot(Xp(particle), Yp(particle), '.m'), hold on
+contourf(X(1,:), Y(:,1), Q(:,:,2),1),  colorbar('EastOutside'), hold on
+plot(Yp, Xp, '.y'), hold on
+plot(y(y_stencil(particle,:)), x(x_stencil(:,particle)), '^-g'), hold on
+plot(Yp(particle), Xp(particle), '.m'), hold on
 plot(X, Y, '-k', Y, X, '-k'), hold off
-xlabel('X'), ylabel('Y')
+xlabel('Y'), ylabel('X')
 
 Q1 = Q(:,:,1);
 
-c11 = c1(:,:,2); c22 = c2(:,:,3); c2b2 = c2b(:,:,4);
+c11 = c1(:,:,3); c22 = c2(:,:,3); c2b2 = c2b(:,:,3);
