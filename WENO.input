@@ -1,0 +1,116 @@
+800         N_x  ' Number of WENO Grid Points
+-----------------------------------------------------------------------------
+              <---  Grid Setup  --->
+
+-5.0        Left 'Left  Physical Domain in x   
+ 6.0       Right 'Right Physical Domain in x   
+-----------------------------------------------------------------------------
+              <---  Grid Setup  --->
+
+5  2   1.0d-12 1.0    WENO Order/Weight(0-JS,1-HAP,2-Z)/Epsilon/Power 
+   1.1 0       2     WENO Lambda/Sound_Speed/Unroll_Loop
+-----------------------------------------------------------------------------
+              <---  Read Timing data --->
+
+0         Restart Step '  Restart Step (0-Clean Start else From Step Number)
+
+0.0       Begin_Time '  Begin Time
+1.0       Final_Time '  Final Time
+0.60             CFL '  CFL condition
+
+0.275      Movie_Resolution 'Output Movie Resolution 
+-----------------------------------------------------------------------------
+              <---  Initial Conditions --->
+
+6     Shock_Type     '  (See Below)
+1.4   Gamma          '  Gamma
+10.0   Mach           '  Mach Number
+1.0   P_Ratio        '  Pressure Ratio
+
+0     Shock_Profile  '  (See Below)
+-1.0   Shock_Location '  Location of the Shock
+0.2   Amplitude      '  Amplitude A of Perturbation
+5     Wave Number    '  Wave Number k of the Perturbation 
+-----------------------------------------------------------------------------
+              <---  Filtering ---->
+
+0     Choice    '0-Off, 1-On
+6     Order     ' Order of the Filtering < 9
+0.2   Viscosity ' parameter for the High Pass filter (value between 0 and 1)
+
+
+-----------------------------------------------------------------------------
+Shock_Type Case
+ 1   123
+ 2   Sod
+ 3   Lax
+ 4   LeBlanc
+ 5   Interacting Blast Wave
+ 6   Moving
+ 7   Fixed
+ 8   P_Ratio
+
+Shock_Profile Case
+ 0   Step
+ 1   A*sin(k*pi*x)
+ 2   e^(-A/P*cos(k*pi*x))
+ 3   e^(-A*sin(k*x))
+ 4   e^(-A*sin(k*x)/gamma)
+ 5   Interacting Blast Wave
+
+!  Shock_Type  Type of Shock definitions (Input)
+!
+!               -1   Custom Shock Tube Proglem
+!
+!                1   Shock Tube Problem - 123
+!                      (Final_Time=1.0, x_Left=-5, x_Right=5, Gamma=1.4,
+!                                                             Shock_Location=0)
+!
+!                2   Shock Tube Problem - SOD
+!                      (Final_Time=2.0, x_Left=-5, x_Right=5, Gamma=1.4,
+!                                                             Shock_Location=0)
+!
+!                3   Shock Tube Problem - LAX
+!                      (Final_Time=1.3, x_Left=-5, x_Right=5, Gamma=1.4,
+!                                                             Shock_Location=0)
+!
+!                4   Shock Tube Problem - LeBlanc
+!                      (Final_Time=1.0d-4, x_Left=-10, x_Right=10, Gamma=1.4,
+!                                                             Shock_Location=0)
+!
+!                5   Interacting Blast Wave (Gamma)
+!
+!                6   Moving Shock (Gamma, Mach)
+!               -6   Moving Shock (Gamma, Mach, Rho_Right, P_Right)
+!               -7   Moving Shock (Gamma, Mach, Rho_Right, T_Right, 
+!                                         Molecular_Weight)
+!
+!                7   Fixed  Shock (Gamma, Mach)
+!
+!                8   Moving Shock (Gamma, P_Ratio)
+
+
+!  Shock_Profile_Type    Type of Initial Conditions
+!               0   Step Functions  (123, SOD, LAX, LeBlanc)  (DEFAULT)
+!
+!               1   Moving Shock-Density Wave Interaction
+!                       rho = rho+Amplitude*sin(Wave_Number*pi*x)
+!                     where
+!                       rho is the density to the right of the shock.
+!
+!               2   Moving Shock-Entropy Wave Interaction
+!                       rho = rho*exp(-Amplitude/P*COS(Wave_Number*pi*x)
+!                     where
+!                       rho is the density to the right of the shock.
+!
+!               3   Moving Shock-Entropy Wave Interaction
+!                       rho = rho*exp(-Amplitude*SIN(Wave_Number*x))
+!                     where
+!                       rho is the density to the right of the shock.
+!
+!               4   Moving Shock-Entropy Wave Interaction
+!                       rho = rho*exp(-Amplitude*SIN(Wave_Number*x)/Gamma)
+!                     where
+!                       rho is the density to the right of the shock.
+!  2.0 1.8 1.3 2.0      Final_Time '  Final Time
+
