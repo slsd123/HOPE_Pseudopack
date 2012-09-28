@@ -1,9 +1,9 @@
-function [Qfp, x_stencil, y_stencil, c1, c2, c2b] = Interpolate_Fluid_To_Particle(N0, N5, M0, M5, NV, Index,...
+function [Qfp, x_stencil, y_stencil, c1, c2, c2b, Top] = Interpolate_Fluid_To_Particle(N0, N5, M0, M5, NV, Index,...
     Order, Xp, Yp, dx, dy, x, y, Q)
 [x0, x1, y0, y1, cx, cy] = ENO_Interpolation_Setup(N0, N5, M0, M5, Order,...
     x, y, dx, dy);
 
-[c1 c2 c2b]        = Divided_Differences(N0, N5, M0, M5, x, y, Q, Index, Order);
+[c1 c2 c2b]    = Divided_Differences(N0, N5, M0, M5, x, y, Q, Index, Order);
 [Left Bottom Top]  = ENO_Interpolation_Stencil(N0, N5, M0, M5, Order, c1, c2, c2b);
 
 Np   = length(Xp);

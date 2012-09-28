@@ -45,7 +45,7 @@ for i = N0:N5
             for k = Order+1:-1:l+1
                 c(k) = (c(k)-c(k-1))/(ya(k)-ya(k-l));
             end
-            c2b(i,j,l) = c(k)-.0001;
+            c2b(i,j,l) = c(k)+.0001;
         end
     end
 end

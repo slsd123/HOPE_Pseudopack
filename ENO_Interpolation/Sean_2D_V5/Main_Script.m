@@ -1,9 +1,10 @@
 clear all; clc%; close all;
 
 % Number of particles
-Np = 500;
+Np = 200;
 % Check the stencil for particle number:
-particle = 160;
+particle  = 55;
+particle2 = 3;
 
 % Constants
 NV    = 4;
@@ -11,16 +12,17 @@ Index = 2;
 Order = 5;
 
 % Initial Setup
-Initial = 2; % 1=Diagonal, 2=Vertical
+Initial   = 3; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
+Part_init = 3; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
 
 % Domain
-x0       =  10;
-x1       = -10;
-N_grid_x =  100;
+x0       = -10;
+x1       =  10;
+N_grid_x =  50;
 
-y0       =  10;
-y1       = -10;
-N_grid_y =  100;
+y0       = -10;
+y1       =  10;
+N_grid_y =  50;
 
 % Creating the grid domain
 dx       = (x1-x0)/(N_grid_x-1);
@@ -36,8 +38,8 @@ M5       =  N_grid_y;
 [X,Y] = meshgrid(x0:dx:x1,y0:dy:y1);
 
 % Putting the source onto the grid
-offset_m = 50;
-offset_p = 70;
+offset_m = 40;
+offset_p = 20;
 Q = zeros(N_grid_x, N_grid_y, NV);
 
 if Initial == 1
@@ -50,17 +52,21 @@ if Initial == 1
         end
     end
 elseif Initial == 2
-    Q(:,:,1) = (heaviside(-Y))';
-    Q(:,:,2) = (heaviside(-Y))';
-    Q(:,:,3) = (heaviside(-Y))';
-    Q(:,:,4) = (heaviside(-Y))';
-    Q(:,floor(N_grid_x/3):floor(2*N_grid_x/3),:) = 1;
-    
-    Q(:,:,1) = (heaviside(-Y))';
-    Q(:,:,2) = (heaviside(-Y))';
-    Q(:,:,3) = (heaviside(-Y))';
-    Q(:,:,4) = (heaviside(-Y))';
-    Q(:,floor(N_grid_x/3):floor(2*N_grid_x/3),:) = 1;
+    for i = 1:N_grid_x-offset_m
+        for j = 1:N_grid_x-i-offset_m
+            Q(i,j,1) = 1;
+            Q(i,j,2) = 1;
+            Q(i,j,3) = 1;
+            Q(i,j,4) = 1;
+        end
+    end
+elseif Initial == 3
+%     Q(:,:,1) = (heaviside(-Y))';
+%     Q(:,:,2) = (heaviside(-Y))';
+%     Q(:,:,3) = (heaviside(-Y))';
+%     Q(:,:,4) = (heaviside(-Y))';
+    Q = zeros(N_grid_x, N_grid_y, NV);
+    Q(:,floor(N_grid_y/3):N_grid_y,:) = 1;
 end
 
 % Particle initialization
@@ -72,25 +78,36 @@ y_1 = y1-5*dy;
 dXp = (x_1-x_0)/(Np);
 dYp = (y_1-y_0)/(Np);
 
-Xp  = x_0+dXp/2:dXp:x_1-dXp/2;
-Yp  = y_0+dYp/2:dYp:y_1-dYp/2;
-Xp(1:Np/2)    =  1;
-Xp(Np/2+1:Np) = -1;
+if Part_init == 1
+    Xp  = (x_0+dXp/2:dXp:x_1-dXp/2);
+    Yp  =  y_0+dYp/2:dYp:y_1-dYp/2;
+elseif Part_init == 2
+    Xp  = -(x_0+dXp/2:dXp:x_1-dXp/2);
+    Yp  =   y_0+dYp/2:dYp:y_1-dYp/2;
+elseif Part_init == 3
+    Xp  = -(x_0+dXp/2:dXp:x_1-dXp/2);
+    Yp  =  y_0+dYp/2:dYp:y_1-dYp/2;
+    Xp(:) = 0;
+end
 
-[Qfp, x_stencil, y_stencil, c1, c2, c2b] = Interpolate_Fluid_To_Particle(N0, N5, M0, M5,...
-    NV, Index, Order, Xp, Yp, dx, dy, x, y, Q);
+[Qfp, x_stencil, y_stencil, c1, c2, c2b, Top] = Interpolate_Fluid_To_Particle...
+    (N0, N5, M0, M5, NV, Index, Order, Xp, Yp, dx, dy, x, y, Q);
 
 % figure(1),plot(Q  (1,:,2),'.-b'), title('Q')
-figure(2),plot(Qfp(2,:)  ,'.r'), title('Qfp')
+figure(1),plot(Qfp(2,:)  ,'.r'), title('Qfp')
 
 figure(3)
-contourf(X(1,:), Y(:,1), Q(:,:,2),1),  colorbar('EastOutside'), hold on
-plot(Yp, Xp, '.y'), hold on
-plot(y(y_stencil(particle,:)), x(x_stencil(:,particle)), '^-g'), hold on
-plot(Yp(particle), Xp(particle), '.m'), hold on
+contourf(X(1,:), Y(:,1), Q(:,:,2)',1),  colorbar('EastOutside'), hold on
+plot(Xp, Yp, '.y'), hold on
+plot(x(x_stencil(:,particle)), y(y_stencil(particle,:)), '^-g'), hold on
+plot(x(x_stencil(:,particle)'), y(y_stencil(particle,Order+1:-1:1)), '^-g'), hold on
+plot(Xp(particle), Yp(particle), '.m'), hold on
+plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,:)), '^-g'), hold on
+plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,Order+1:-1:1)), '^-g'), hold on
+plot(Xp(particle2), Yp(particle2), '.m'), hold on
 plot(X, Y, '-k', Y, X, '-k'), hold off
-xlabel('Y'), ylabel('X')
+ylabel('Y'), xlabel('X')
 
 Q1 = Q(:,:,1);
 
-c11 = c1(:,:,3); c22 = c2(:,:,3); c2b2 = c2b(:,:,3);
+c11 = c1(:,:,2); c22 = c2(:,:,2); c2b2 = c2b(:,:,2);
