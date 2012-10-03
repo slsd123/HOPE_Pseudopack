@@ -1,0 +1,7 @@
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/HidCtrRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/HidVarRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/MA ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/ORBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/OutWtsRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/RBF_INPUT ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/RE ./
