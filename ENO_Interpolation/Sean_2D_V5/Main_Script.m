@@ -1,10 +1,10 @@
 clear all; clc%; close all;
 
 % Number of particles
-Np = 200;
+Np = 60;
 % Check the stencil for particle number:
-particle  = 55;
-particle2 = 3;
+particle  = 40;
+particle2 = 9;
 
 % Constants
 NV    = 4;
@@ -16,12 +16,12 @@ Initial   = 3; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
 Part_init = 3; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
 
 % Domain
-x0       = -10;
-x1       =  10;
+x0       = -11.13636;
+x1       =  11.13636;
 N_grid_x =  50;
 
-y0       = -10;
-y1       =  10;
+y0       = -11.13636;
+y1       =  11.13636;
 N_grid_y =  50;
 
 % Creating the grid domain
@@ -38,7 +38,7 @@ M5       =  N_grid_y;
 [X,Y] = meshgrid(x0:dx:x1,y0:dy:y1);
 
 % Putting the source onto the grid
-offset_m = 40;
+offset_m = 0;
 offset_p = 20;
 Q = zeros(N_grid_x, N_grid_y, NV);
 
@@ -61,12 +61,12 @@ elseif Initial == 2
         end
     end
 elseif Initial == 3
-%     Q(:,:,1) = (heaviside(-Y))';
-%     Q(:,:,2) = (heaviside(-Y))';
-%     Q(:,:,3) = (heaviside(-Y))';
-%     Q(:,:,4) = (heaviside(-Y))';
     Q = zeros(N_grid_x, N_grid_y, NV);
-    Q(:,floor(N_grid_y/3):N_grid_y,:) = 1;
+    Q(:,ceil(N_grid_y/2):N_grid_y,:) = 1;
+elseif Initial == 4
+    for i = 1:N_grid_y
+        Q(1:N_grid_x,i, 1:NV) = i;
+    end
 end
 
 % Particle initialization
@@ -97,7 +97,11 @@ end
 figure(1),plot(Qfp(2,:)  ,'.r'), title('Qfp')
 
 figure(3)
-contourf(X(1,:), Y(:,1), Q(:,:,2)',1),  colorbar('EastOutside'), hold on
+if Initial == 4
+    contourf(X(1,:), Y(:,1), Q(:,:,2)'),  colorbar('EastOutside'), hold on
+else
+    contourf(X(1,:), Y(:,1), Q(:,:,2)',2),  colorbar('EastOutside'), hold on
+end
 plot(Xp, Yp, '.y'), hold on
 plot(x(x_stencil(:,particle)), y(y_stencil(particle,:)), '^-g'), hold on
 plot(x(x_stencil(:,particle)'), y(y_stencil(particle,Order+1:-1:1)), '^-g'), hold on
@@ -110,4 +114,4 @@ ylabel('Y'), xlabel('X')
 
 Q1 = Q(:,:,1);
 
-c11 = c1(:,:,2); c22 = c2(:,:,2); c2b2 = c2b(:,:,2);
+c11 = c1(1:N_grid_x-Order,:,2); c22 = c2(:,1:N_grid_y-Order,2); c2b2 = c2b(:,Order+1:N_grid_y-Order,2);
