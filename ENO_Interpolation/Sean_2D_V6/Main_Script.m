@@ -1,10 +1,10 @@
 clear all; clc%; close all;
 
 % Number of particles
-Np = 60;
+Np = 1000;
 % Check the stencil for particle number:
-particle  = 30;
-particle2 = 11;
+particle  = 27;
+particle2 = 30;
 
 % Constants
 NV    = 4;
@@ -12,17 +12,17 @@ Index = 2;
 Order = 5;
 
 % Initial Setup
-Initial   = 1; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
+Initial   = 2; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
 Part_init = 3; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
 
 % Domain
-x0       = -11.13636;
-x1       =  11.13636;
-N_grid_x =  50;
+x0       = -10;
+x1       =  10;
+N_grid_x =  500;
 
-y0       = -11.13636;
-y1       =  11.13636;
-N_grid_y =  50;
+y0       = -10;
+y1       =  10;
+N_grid_y =  500;
 
 % Creating the grid domain
 dx       = (x1-x0)/(N_grid_x-1);
@@ -38,7 +38,7 @@ M5       =  N_grid_y;
 [X,Y] = meshgrid(x0:dx:x1,y0:dy:y1);
 
 % Putting the source onto the grid
-offset_m = 0;
+offset_m = 30;
 offset_p = 20;
 Q = zeros(N_grid_x, N_grid_y, NV);
 
@@ -85,18 +85,18 @@ elseif Part_init == 2
     Xp  = -(x_0+dXp/2:dXp:x_1-dXp/2);
     Yp  =   y_0+dYp/2:dYp:y_1-dYp/2;
 elseif Part_init == 3
-    Xp  = -(x_0+dXp/2:dXp:x_1-dXp/2);
-    Yp  =  y_0+dYp/2:dYp:y_1-dYp/2;
+    Xp  = x_0+dXp/2:dXp:y_1-dXp/2;
+    Yp  = y_0+dYp/2:dYp:y_1-dYp/2;
     Xp(:) = 0;
 end
 
-[Qfp, x_stencil, y_stencil, c1, c2, c2b, Top, Bottom] = Interpolate_Fluid_To_Particle...
+[Qfp, x_stencil, y_stencil, c1, c1r, c2, c2b, Top, Right] = Interpolate_Fluid_To_Particle...
     (N0, N5, M0, M5, NV, Index, Order, Xp, Yp, dx, dy, x, y, Q);
 
 % figure(1),plot(Q  (1,:,2),'.-b'), title('Q')
 figure(1),plot(Qfp(2,:)  ,'.r'), title('Qfp')
 
-figure(3)
+figure(4)
 if Initial == 4
     contourf(X(1,:), Y(:,1), Q(:,:,2)'),  colorbar('EastOutside'), hold on
 else
@@ -109,8 +109,8 @@ plot(Xp(particle), Yp(particle), '.m'), hold on
 plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,:)), '^-g'), hold on
 plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,Order+1:-1:1)), '^-g'), hold on
 plot(Xp(particle2), Yp(particle2), '.m'), hold on
-plot(X, Y, '-k', Y, X, '-k'), hold off
-ylabel('Y'), xlabel('X')
+% plot(X, Y, '-k', Y, X, '-k'), hold off
+% ylabel('Y'), xlabel('X')
 
 Q1 = Q(:,:,1);
 

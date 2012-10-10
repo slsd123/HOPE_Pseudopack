@@ -1,4 +1,4 @@
-function [Left Bottom Top] = ENO_Interpolation_Stencil(N0, N5, M0, M5, Order, c1, c2, c2b)
+function [Left Right Bottom Top] = ENO_Interpolation_Stencil(N0, N5, M0, M5, Order, c1, c1r, c2, c2b)
 
 Left                = zeros(N5-N0+1,M5-M0+1);
 Left(N0,:           ) = 1;                             
@@ -14,6 +14,25 @@ for j = M0:M5
             end
         end
         Left(i,j) = is;
+    end
+end
+
+Right                   = zeros(N5-N0+1, M5-M0+1);
+Right(N0           , :) = 1;
+Right(N5-Order+1:N5, :) = N5-Order;
+for j = M0:M5
+    for i = N0:N5-Order
+        is = i;
+        for m = 2:Order
+            if ((is+1) <= N5 && (is+1) > N0)
+                if (abs(c1r(is+1,j,m)) < abs(c1r(is,j,m)))
+                    is = is + 1;
+                end
+            else
+                is = i;
+            end
+        end
+        Right(i,j) = is;
     end
 end
 
