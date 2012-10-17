@@ -1,7 +1,11 @@
 function [Qfp, x_stencil, y_stencil] = ENO_Interpolation(NV, Order, dx, dy, x, y, Q, dPdx,...
-    Xp, Yp, i1, j1, Left, Bottom, Top, cx, cy)
+    Xp, Yp, i1, j1, Left, Right, Bottom, Top, cx, cy)
 
-i0 = Left(i1,j1);
+if Xp < 0
+    i0 = Right(i1,j1)-Order+1;
+else
+    i0 = Left(i1,j1);
+end
 
 if Yp <= 0
     j0 = Top (i1,j1)-Order+1;
