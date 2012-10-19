@@ -1,6 +1,6 @@
 1 = Number of Hidden Units
 NaN = OB Weight
 2 = Number of Inputs (Re, Ma, ... etc.)
-4.000000 = Normalization factor for the first input
-10000.000000 = Normalization factor for the second input
+1.750000 = Normalization factor for the first input
+100000.000000 = Normalization factor for the second input
 7.964345 = Normalization factor for the drag
