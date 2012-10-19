@@ -1,5 +1,5 @@
-100 = Number of Hidden Units
-0.102203 = OB Weight
+1 = Number of Hidden Units
+NaN = OB Weight
 2 = Number of Inputs (Re, Ma, ... etc.)
 4.000000 = Normalization factor for the first input
 10000.000000 = Normalization factor for the second input

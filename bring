@@ -1,7 +1,11 @@
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/HidCtrRBF ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/HidVarRBF ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/MA ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/ORBF ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/OutWtsRBF ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/RBF_INPUT ./
-scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v4/RE ./
+#! /bin/bash
+
+a=4
+
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/HidCtrRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/HidVarRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/MA ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/ORBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/OutWtsRBF ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/RBF_INPUT ./
+scp ../../Research/Meetings_With_Uday/ANN_Code/CODE_v$a/RE ./
