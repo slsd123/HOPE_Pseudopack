@@ -10,19 +10,20 @@ particle2 = 436;
 NV    = 4;
 Index = 2;
 Order = 5;
+AVG   = 3;
 
 % Initial Setup
 Initial   = 2; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
-Part_init = 3; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
+Part_init = 1; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
 
 % Domain
 x0       = -10;
 x1       =  10;
-N_grid_x =  500;
+N_grid_x =  100;
 
 y0       = -10;
 y1       =  10;
-N_grid_y =  500;
+N_grid_y =  100;
 
 % Creating the grid domain
 dx       = (x1-x0)/(N_grid_x-1);
@@ -87,7 +88,17 @@ elseif Part_init == 2
 elseif Part_init == 3
     Xp  = x_0+dXp/2:dXp:y_1-dXp/2;
     Yp  = y_0+dYp/2:dYp:y_1-dYp/2;
-    xp(:) = 0;
+    Xp(:) = 0;
+end
+
+for n = 1:AVG
+    Q_temp = Q;
+    for i = 2:N_grid_x-1
+        for j = 2:N_grid_y
+            Q(i,j,:) = (Q_temp(i+1,j) + Q_temp(i,j+1) + Q_temp(i+1,j+1) +...
+                      + Q_temp(i-1,j) + Q_temp(i,j-1) + Q_temp(i-1,j-1))/6;
+        end
+    end
 end
 
 [Qfp, x_stencil, y_stencil, c1, c1r, c2, c2b, Top, Right] = Interpolate_Fluid_To_Particle...
@@ -98,6 +109,8 @@ figure(1),plot(Qfp(2,:)  ,'.r'), title('Qfp')
 
 figure(4)
 if Initial == 4
+    contourf(X(1,:), Y(:,1), Q(:,:,2)'),  colorbar('EastOutside'), hold on
+elseif AVG > 0
     contourf(X(1,:), Y(:,1), Q(:,:,2)'),  colorbar('EastOutside'), hold on
 else
     contourf(X(1,:), Y(:,1), Q(:,:,2)',2),  colorbar('EastOutside'), hold on
