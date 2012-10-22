@@ -15,7 +15,7 @@ for np = 1 : Np
     [x_n y_n y_n_s] = Particle_Locate_HostCell(N0, N5, M0, M5, Xp(np), Yp(np),...
         x0, x1, y0, y1, Order);
     
-    [Top Bottom] = check_stencil(x_n, y_n, Top, Bottom, c2, c2b, Order);
+%     [Top Bottom] = check_stencil(x_n, y_n, Top, Bottom, c2, c2b, Order);
     
     
 % Algorithm in WENO Code must use y_n_s because it balances including the ghost points.
