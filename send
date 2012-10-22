@@ -1,7 +1,11 @@
-scp HidCtrRBF ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp HidVarRBF ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp MA ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp ORBF ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp OutWtsRBF ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp RBF_INPUT ../CURRENT_Codes/1D_Code_v1.0.4/Input/
-scp RE ../CURRENT_Codes/1D_Code_v1.0.4/Input/
+#! /bin/bash
+
+a='6'
+
+scp HidCtrRBF ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp HidVarRBF ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp MA ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp ORBF ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp OutWtsRBF ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp RBF_INPUT ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
+scp RE ../CURRENT_Codes/1D_Code_v1.0.$a/Input/
