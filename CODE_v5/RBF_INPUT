@@ -1,6 +1,6 @@
-1000 = Number of Hidden Units
-457379.899412 = OB Weight
+2000 = Number of Hidden Units
+39.086728 = OB Weight
 2 = Number of Inputs (Re, Ma, ... etc.)
 1.750000 = Normalization factor for the first input
-100000.000000 = Normalization factor for the second input
-1.541401 = Normalization factor for the drag
+10000.000000 = Normalization factor for the second input
+7.964345 = Normalization factor for the drag

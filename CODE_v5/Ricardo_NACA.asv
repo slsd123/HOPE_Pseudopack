@@ -4,10 +4,10 @@ clear all; clc;% close all;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %                          GENERATE THE I/O PATTERN
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-train_pts_ma = 20;
-train_pts_re = 250;
-test_pts     = 125;
-nunitsRBF    = 2000; % No.of Units in the Hidden Layer
+train_pts_ma = 25;
+train_pts = 250;
+test_pts  = 125;
+nunitsRBF = 1000; % No.of Units in the Hidden Layer
 
 map_max   = 1.75;
 rep_max   = 10000;
