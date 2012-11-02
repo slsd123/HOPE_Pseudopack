@@ -1,29 +1,29 @@
 clear all; clc%; close all;
 
 % Number of particles
-Np = 1000;
+Np = 500;
 % Check the stencil for particle number:
-particle  = 440;
-particle2 = 436;
+particle  = 288;
+particle2 = 289;
 
 % Constants
 NV    = 4;
 Index = 2;
 Order = 5;
-AVG   = 3;
-
+AVG   = 0;
+for AVG = 0:5
 % Initial Setup
 Initial   = 2; % Fluid: 1=diagonal, 2=diagonal (opp), 3=horizontal
-Part_init = 1; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
+Part_init = 2; % Part: 1=diagonal (perpendic), 2=diagonal(along), 3=vertical
 
 % Domain
 x0       = -10;
 x1       =  10;
-N_grid_x =  100;
+N_grid_x =  50;
 
 y0       = -10;
 y1       =  10;
-N_grid_y =  100;
+N_grid_y =  50;
 
 % Creating the grid domain
 dx       = (x1-x0)/(N_grid_x-1);
@@ -40,30 +40,25 @@ M5       =  N_grid_y;
 
 % Putting the source onto the grid
 offset_m = 0;
-offset_p = 20;
+offset_p = 0;
 Q = zeros(N_grid_x, N_grid_y, NV);
 
 if Initial == 1
     for i = N_grid_x-offset_m:-1:1
         for j = 1:N_grid_x-i-offset_m
-            Q(i,j,1) = 1;
-            Q(i,j,2) = 1;
-            Q(i,j,3) = 1;
-            Q(i,j,4) = 1;
+            Q(i,j,:) = 1;
         end
     end
 elseif Initial == 2
     for i = 1:N_grid_x-offset_m
         for j = 1:N_grid_x-i-offset_m
-            Q(i,j,1) = 1;
-            Q(i,j,2) = 1;
-            Q(i,j,3) = 1;
-            Q(i,j,4) = 1;
+            Q(i,j,:) = 1;
         end
     end
 elseif Initial == 3
     Q = zeros(N_grid_x, N_grid_y, NV);
-    Q(:,ceil(N_grid_y/3):N_grid_y,:) = 1;
+%     Q(:,ceil(N_grid_y/3):N_grid_y,:) = 1;
+    Q(:,ceil(N_grid_y/2)+1:N_grid_y,:) = 1;
 elseif Initial == 4
     for i = 1:N_grid_y
         Q(1:N_grid_x,i, 1:NV) = i;
@@ -94,9 +89,10 @@ end
 for n = 1:AVG
     Q_temp = Q;
     for i = 2:N_grid_x-1
-        for j = 2:N_grid_y
+        for j = 2:N_grid_y-1
             Q(i,j,:) = (Q_temp(i+1,j) + Q_temp(i,j+1) + Q_temp(i+1,j+1) +...
-                      + Q_temp(i-1,j) + Q_temp(i,j-1) + Q_temp(i-1,j-1))/6;
+                        Q_temp(i-1,j) + Q_temp(i,j-1) + Q_temp(i-1,j-1) +...
+                        Q_temp(i-1,j+1) + Q_temp(i+1,j-1))/8;
         end
     end
 end
@@ -106,6 +102,9 @@ end
 
 % figure(1),plot(Q  (1,:,2),'.-b'), title('Q')
 figure(1),plot(Qfp(2,:)  ,'.r'), title('Qfp')
+axis([0 500 0 1])
+q=['Averaged over ' num2str(AVG)];
+title(q)
 
 figure(4)
 if Initial == 4
@@ -117,13 +116,21 @@ else
 end
 plot(Xp, Yp, '.y'), hold on
 plot(x(x_stencil(:,particle)), y(y_stencil(particle,:)), '^-g'), hold on
-plot(x(x_stencil(:,particle)'), y(y_stencil(particle,Order+1:-1:1)), '^-g'), hold on
+plot(x(x_stencil(:,particle)'), y(y_stencil(particle,Order   :-1:1)), '^-g'), hold on
 plot(Xp(particle), Yp(particle), '.m'), hold on
 plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,:)), '^-g'), hold on
-plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,Order+1:-1:1)), '^-g'), hold on
+plot(x(x_stencil(:,particle2)), y(y_stencil(particle2,Order   :-1:1)), '^-g'), hold on
 plot(Xp(particle2), Yp(particle2), '.m'), hold on
 plot(X, Y, '-k', Y, X, '-k'), hold on
 ylabel('Y'), xlabel('X'), hold off
+
+figure(2)
+subplot(1,6,AVG+1), plot(Qfp(2,:)  ,'.r'), title('Qfp')
+axis([0 500 0 1])
+q=['Avg Over ' num2str(AVG) ' Cells'];
+title(q), ylabel('Qfp'), xlabel('Particle Number')
+
+end
 
 Q1 = Q(:,:,1);
 

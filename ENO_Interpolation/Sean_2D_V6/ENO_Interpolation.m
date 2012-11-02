@@ -15,19 +15,19 @@ ya = y(j1);
 dx1 = (Xp-xa)+(i1-i0)*dx;
 dy1 = (Yp-ya)+(j1-j0)*dy;
 
-hx = zeros(1,Order+1);
-hy = zeros(1,Order+1);
-for n = 1:Order+1
-    hx(n) = Polynomial(n, dx1, Order+1, cx);
-    hy(n) = Polynomial(n, dy1, Order+1, cy);
+hx = zeros(1,Order   );
+hy = zeros(1,Order   );
+for n = 1:Order   
+    hx(n) = Polynomial(n, dx1, Order   , cx);
+    hy(n) = Polynomial(n, dy1, Order   , cy);
 end
 
 Qfp = zeros(NV+1,1);
 
 for i = 1:NV
     Sum0 = 0;
-    for n = 1:Order+1
-        for m = 1:Order+1
+    for n = 1:Order   
+        for m = 1:Order   
             Sum0 = Sum0+Q(i0+n-1, j0+m-1, i)*hy(m)*hx(n);
             x_stencil(n, m) = i0+n-1;
             y_stencil(n, m) = j0+m-1;
@@ -40,7 +40,7 @@ x_stencil = x_stencil(:,1);
 y_stencil = y_stencil(1,:);
 
 Sum0 = 0;
-for n = 1:Order+1
+for n = 1:Order   
     Sum0 = Sum0+dPdx(i0+n-1)*hx(n)*hy(n);
 end
 Qfp(NV+1,1) = Sum0;
